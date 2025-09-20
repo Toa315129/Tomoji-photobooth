@@ -1,635 +1,141 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Tomoji PhotoBooth — Best Cute Photo Booth</title>
-
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Patrick+Hand&family=Sriracha&display=swap" rel="stylesheet">
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tomoji Photobooth</title>
 <style>
-:root{
-  --bg:#f6f2ee;      /* cream */
-  --accent:#3b5a99;  /* deep blue */
-  --pale:#dfe9ff;
-  --pink:#ffb6d0;
-  --mint:#b7ead6;
-  --yellow:#fff1a8;
-  --text:#243042;
+body{
+  background:#fdfaf4;
+  font-family:"Comic Sans MS", "Segoe UI", cursive;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);font-family:"Patrick Hand","Sriracha",sans-serif;color:var(--text)}
-.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
-.app{width:100%;max-width:1200px;background:#fff;border-radius:18px;padding:20px;border:6px solid var(--accent);box-shadow:0 18px 40px rgba(0,0,0,.08);}
-
-/* header */
-.header{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:12px}
-.logo{width:88px;height:88px;border-radius:50%;background:linear-gradient(180deg,#fff,#f3f3f3);display:flex;align-items:center;justify-content:center;border:3px solid rgba(0,0,0,0.06)}
-.title{font-family:"Pacifico",cursive;font-size:34px;color:var(--accent);text-transform:none}
-.subtitle{font-size:12px;color:rgba(0,0,0,0.5);text-align:center;margin-top:4px}
-
-/* layout */
-.row{display:flex;gap:18px;flex-wrap:wrap}
-.left{flex:1 1 680px;min-width:360px}
-.right{width:340px;flex:0 0 340px}
-
-/* preview */
-.preview{background:#fff;border-radius:14px;border:6px solid var(--pale);overflow:hidden;aspect-ratio:3/4;position:relative;display:flex;align-items:center;justify-content:center}
-video{width:100%;height:100%;object-fit:cover;display:block}
-.preview-overlay{position:absolute;inset:0;pointer-events:none}
-.countdown{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:72px;color:var(--pink);font-weight:800;text-shadow:0 6px 20px rgba(0,0,0,0.12)}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .18s}
-
-/* controls */
-.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:12px}
-.btn{padding:10px 14px;border-radius:12px;border:2px solid var(--accent);background:var(--pale);cursor:pointer;font-weight:700}
-.btn.primary{background:var(--accent);color:#fff}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.shutter{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:6px solid var(--accent);font-size:30px;cursor:pointer}
-
-/* right panel */
-.panel{background:#fff;border-radius:12px;padding:12px;border:3px solid #eee;margin-bottom:12px}
-.panel h4{margin:0 0 8px;font-size:14px;color:var(--accent);text-transform:uppercase}
-
-/* QR area */
-#qrcode{display:flex;align-items:center;justify-content:center;padding:8px;background:#fff;border-radius:8px;border:2px dashed #e6e6e6;min-height:120px}
-
-/* result preview 4x6 box */
-.resultWrap{display:flex;align-items:center;justify-content:center;margin-top:14px}
-.result{width:360px;height:540px;background:#fff;border-radius:14px;border:6px solid var(--pink);padding:10px;position:relative;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
-.result .brand{position:absolute;left:50%;top:-28px;transform:translateX(-50%);background:var(--pale);color:var(--accent);padding:6px 12px;border-radius:18px;border:3px solid var(--accent);font-family:"Pacifico";}
-
-/* three slots vertical */
-.slot{height:33%;margin-bottom:8px;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-size:20px}
-.slot img{width:100%;height:100%;object-fit:cover}
-
-/* themed frames */
-.slot.heart{background:linear-gradient(180deg,#fff0f6, #fff6fb);border:6px dashed var(--pink);box-shadow:inset 0 4px 0 rgba(255,255,255,0.5)}
-.slot.square{background:linear-gradient(180deg,#f0f9ff,#f7fdff);border:6px solid var(--pale)}
-.slot.star{background:linear-gradient(180deg,#f3fff6,#fbfff9);border:6px dotted var(--mint)}
-
-/* decorative labels */
-.label{position:absolute;font-family:"Patrick Hand";font-weight:700;padding:6px 10px;border-radius:12px;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,0.08);}
-
-/* footer */
-.credits{margin-top:12px;text-align:center;color:rgba(0,0,0,0.6);font-size:13px}
-.controls-row{display:flex;gap:8px;align-items:center;justify-content:center}
-select, input[type=file]{padding:8px;border-radius:10px;border:1px solid #ddd}
-.small{font-size:13px;color:rgba(0,0,0,0.6)}
+.container{max-width:420px;text-align:center;}
+.preview{position:relative;width:360px;height:540px;margin:0 auto;border:6px solid #a7d8f7;border-radius:16px;overflow:hidden;background:#fff;}
+#video{width:100%;height:100%;object-fit:cover;}
+#overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.controls{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+button{
+  padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
+  background:#ffd6e8;color:#333;transition:0.2s;
+}
+button:hover{background:#90c9a7;color:#fff;}
+#countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:4rem;color:#ff3366;font-weight:bold;text-shadow:2px 2px #fff;}
+#gallery{margin-top:14px;}
 </style>
 </head>
 <body>
+<h1>💖 Tomoji Photobooth 💖</h1>
 <div class="container">
-  <div class="app" role="application" aria-label="Tomoji Photo Booth">
-    <div class="header">
-      <div class="logo" aria-hidden="true">
-        <!-- small emblem -->
-        <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#3b5a99" stroke-width="1.6"><ellipse cx="24" cy="12" rx="14" ry="6"/><path d="M7 12c8 8 30 8 36 0"/><path d="M24 10v28"/></g>
-        </svg>
-      </div>
-      <div>
-        <div class="title">Tomoji PhotoBooth</div>
-        <div class="subtitle small">น่ารัก สวย ใส — Export 4×6 inch</div>
-      </div>
-    </div>
-
-    <div class="row">
-      <!-- LEFT: camera / controls -->
-      <div class="left">
-        <div class="preview" id="preview">
-          <video id="video" playsinline autoplay></video>
-          <div class="preview-overlay">
-            <div class="countdown" id="countdown"></div>
-            <div class="flash" id="flash"></div>
-          </div>
-        </div>
-
-        <div class="controls">
-          <div class="shutter" id="shutter" title="ถ่าย (3 ช็อต)">📸</div>
-          <div class="controls-row">
-            <button class="btn" id="uploadBtn">📁 Upload 3</button>
-            <button class="btn" id="retakeBtn" disabled>🔁 Retake</button>
-            <button class="btn primary" id="downloadBtn" disabled>⬇️ Download</button>
-            <button class="btn" id="printBtn" disabled>🖨️ Print</button>
-            <button class="btn" id="qrBtn" disabled>🔗 QR</button>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;align-items:center;">
-          <label class="small">Timer</label>
-          <select id="timer">
-            <option value="2">2s</option>
-            <option value="3" selected>3s</option>
-            <option value="5">5s</option>
-          </select>
-          <label class="small" style="margin-left:8px">Filter</label>
-          <select id="filter">
-            <option value="none">Normal</option>
-            <option value="bw">B&W</option>
-            <option value="sepia">Warm</option>
-            <option value="vivid">Vivid</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- RIGHT: preview result + QR -->
-      <div class="right">
-        <div class="panel">
-          <h4>Result (4×6 preview)</h4>
-          <div class="resultWrap">
-            <div class="result" id="resultCanvasWrap">
-              <div class="brand">TOMOJI PHOTOBOOTH</div>
-
-              <div class="slot heart" id="slot1"><span class="label" style="left:10px;top:8px">CUTE</span></div>
-              <div class="slot square" id="slot2"><span class="label" style="right:10px;top:8px">MEMORIES</span></div>
-              <div class="slot star" id="slot3"><span class="label" style="left:10px;bottom:8px">FUN</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h4>QR / Download</h4>
-          <div id="qrcode">No QR yet</div>
-          <div style="margin-top:8px;display:flex;gap:8px;justify-content:center">
-            <button class="btn" id="downloadFinal" disabled>Download Image</button>
-            <button class="btn" id="openLink" disabled>Open Link</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h4>Tips</h4>
-          <div class="small">เปิดผ่าน HTTPS / localhost<br>อนุญาตกล้องเมื่อเบราว์เซอร์ถาม</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-top:12px" class="credits">@tomoji studio • made with ♥</div>
+  <div class="preview">
+    <video id="video" autoplay playsinline></video>
+    <div id="countdown"></div>
+    <!-- กรอบ PNG โปร่งใส -->
+    <img id="overlay" src="frame.png" alt="กรอบโฟโต้บูธ">
   </div>
+  <div class="controls">
+    <button id="shutter">📸 เริ่มถ่าย</button>
+    <button id="download" disabled>⬇️ ดาวน์โหลด</button>
+    <button id="print" disabled>🖨️ ปริ้น</button>
+    <button id="makeqr" disabled>🔗 สร้าง QR</button>
+  </div>
+  <div id="gallery"></div>
+  <div id="qrcode"></div>
 </div>
 
-<!-- QR lib -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <script>
-/* Tomoji PhotoBooth — Full single-file app
- - 3-shot sequence (top-heart, mid-rectangle, bottom-star)
- - upload 3 images
- - filters preview (applied on capture)
- - build final 4x6 image (1200x1800 px)
- - download / print / QR (blob URL)
-*/
+(async()=>{
+const video=document.getElementById("video");
+const shutter=document.getElementById("shutter");
+const downloadBtn=document.getElementById("download");
+const printBtn=document.getElementById("print");
+const qrBtn=document.getElementById("makeqr");
+const countdownEl=document.getElementById("countdown");
+const gallery=document.getElementById("gallery");
+let stream=null,captures=[],finalImage=null;
 
-const video = document.getElementById('video');
-const shutter = document.getElementById('shutter');
-const uploadBtn = document.getElementById('uploadBtn');
-const retakeBtn = document.getElementById('retakeBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const printBtn = document.getElementById('printBtn');
-const qrBtn = document.getElementById('qrBtn');
-const timerSel = document.getElementById('timer');
-const filterSel = document.getElementById('filter');
-const slotEls = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
-const countdownEl = document.getElementById('countdown');
-const flashEl = document.getElementById('flash');
-const qrcodeContainer = document.getElementById('qrcode');
-const downloadFinalBtn = document.getElementById('downloadFinal');
-const openLinkBtn = document.getElementById('openLink');
-
-let stream = null;
-let captures = [null, null, null]; // data URLs
-let finalBlobUrl = null;
-
-/* start camera */
 async function startCamera(){
   try{
-    stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user' }, audio:false });
-    video.srcObject = stream;
-    await video.play();
-  }catch(e){ alert('ไม่สามารถเปิดกล้องได้: ' + (e.message||e)); }
+    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    video.srcObject=stream;
+  }catch(e){alert("ไม่สามารถเปิดกล้องได้: "+e);}
 }
 startCamera();
 
-/* helpers */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function playSnap(){ try{ new Audio('https://cdn.jsdelivr.net/gh/naptha/talkdemo/snap.mp3').play(); }catch(e){} }
-function flashOnce(){ flashEl.style.opacity=0.85; setTimeout(()=>flashEl.style.opacity=0,160); }
+function captureFrame(){
+  const c=document.createElement("canvas");
+  c.width=video.videoWidth; c.height=video.videoHeight;
+  const ctx=c.getContext("2d");
+  ctx.drawImage(video,0,0,c.width,c.height);
+  return c.toDataURL("image/png");
+}
 
-/* apply CSS filter preview */
-filterSel.addEventListener('change', ()=>{
-  const v = filterSel.value;
-  video.style.filter = v === 'bw' ? 'grayscale(1)' : v==='sepia' ? 'sepia(.45) saturate(1.05)' : v==='vivid' ? 'contrast(1.08) saturate(1.2)' : 'none';
+function showCount(n){countdownEl.textContent=n;}
+function hideCount(){countdownEl.textContent="";}
+
+async function takeSequence(){
+  captures=[];
+  for(let i=0;i<2;i++){
+    for(let s=3;s>=1;s--){showCount(s);await new Promise(r=>setTimeout(r,1000));}
+    hideCount();
+    captures.push(captureFrame());
+    if(i<1) await new Promise(r=>setTimeout(r,1000)); // เว้น 1 วิ
+  }
+  await buildFinal();
+  downloadBtn.disabled=false;
+  printBtn.disabled=false;
+  qrBtn.disabled=false;
+}
+
+async function buildFinal(){
+  const overlay=document.getElementById("overlay");
+  const frame=await loadImage(overlay.src);
+
+  const W=frame.width,H=frame.height;
+  const c=document.createElement("canvas");
+  c.width=W; c.height=H;
+  const ctx=c.getContext("2d");
+
+  // ช่องบน
+  const img1=await loadImage(captures[0]);
+  ctx.drawImage(img1,80,80, W-160, (H/2)-120);
+
+  // ช่องล่าง
+  const img2=await loadImage(captures[1]);
+  ctx.drawImage(img2,80,(H/2)+40, W-160, (H/2)-120);
+
+  // กรอบทับ
+  ctx.drawImage(frame,0,0,W,H);
+
+  finalImage=c.toDataURL("image/png");
+  gallery.innerHTML=`<img src="${finalImage}" style="width:100%;border:6px solid #90c9a7;border-radius:16px">`;
+}
+
+function loadImage(src){
+  return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});
+}
+
+shutter.addEventListener("click",takeSequence);
+
+downloadBtn.addEventListener("click",()=>{
+  const a=document.createElement("a");a.href=finalImage;a.download="photobooth.png";a.click();
 });
 
-/* capture frame (applies canvas filter) */
-function captureFrameFromVideo(){
-  const vw = video.videoWidth, vh = video.videoHeight;
-  const c = document.createElement('canvas'); c.width = vw; c.height = vh;
-  const ctx = c.getContext('2d');
-  // apply same filter on canvas for final consistency
-  const v = filterSel.value;
-  ctx.filter = v === 'bw' ? 'grayscale(1)' : v==='sepia' ? 'sepia(.45) saturate(1.05)' : v==='vivid' ? 'contrast(1.08) saturate(1.2)' : 'none';
-  ctx.drawImage(video,0,0,vw,vh);
-  return c.toDataURL('image/png');
-}
-
-/* draw heart/rounded star shapes for clipping */
-function drawStarPath(ctx, cx, cy, spikes, outerR, innerR){
-  let rot = Math.PI/2 * 3;
-  let x = cx;
-  let y = cy;
-  let step = Math.PI / spikes;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - outerR);
-  for(let i=0;i<spikes;i++){
-    x = cx + Math.cos(rot) * outerR;
-    y = cy + Math.sin(rot) * outerR;
-    ctx.lineTo(x,y);
-    rot += step;
-    x = cx + Math.cos(rot) * innerR;
-    y = cy + Math.sin(rot) * innerR;
-    ctx.lineTo(x,y);
-    rot += step;
-  }
-  ctx.closePath();
-}
-
-/* draw heart path - centered in given rect */
-function clipHeart(ctx, x, y, w, h){
-  // using bezier heart shape normalized
-  ctx.beginPath();
-  const cx = x + w/2;
-  const cy = y + h/2.4;
-  const top = y + h*0.18;
-  ctx.moveTo(cx, y + h*0.9);
-  ctx.bezierCurveTo(cx + w*0.6, y + h*0.55, cx + w*0.15, top, cx, top + h*0.02);
-  ctx.bezierCurveTo(cx - w*0.15, top, cx - w*0.6, y + h*0.55, cx, y + h*0.9);
-  ctx.closePath();
-}
-
-/* show thumbnails in UI previews */
-function renderSlots(){
-  for(let i=0;i<3;i++){
-    if(captures[i]) slotEls[i].innerHTML = `<img src="${captures[i]}">`;
-    else slotEls[i].innerHTML = '';
-  }
-}
-
-/* sequence capture: capture from video 3 times (top/mid/bottom) */
-shutter.addEventListener('click', async ()=>{
-  captures = [null,null,null];
-  renderSlots();
-  retakeBtn.disabled = true;
-  downloadBtn.disabled = true;
-  printBtn.disabled = true;
-  qrBtn.disabled = true;
-  downloadFinalBtn.disabled = true;
-  openLinkBtn.disabled = true;
-  qrcodeContainer.innerHTML = 'No QR yet';
-
-  const delay = parseInt(timerSel.value || '3', 10);
-  for(let i=0;i<3;i++){
-    for(let s=delay;s>=1;s--){
-      countdownEl.textContent = s;
-      await sleep(1000);
-    }
-    countdownEl.textContent = '';
-    playSnap(); flashOnce();
-    const data = captureFrameFromVideo();
-    captures[i] = data;
-    renderSlots();
-    await sleep(500);
-  }
-
-  retakeBtn.disabled = false;
-  downloadBtn.disabled = false;
-  printBtn.disabled = false;
-  qrBtn.disabled = false;
-  downloadFinalBtn.disabled = false;
+printBtn.addEventListener("click",()=>{
+  const w=window.open("");
+  w.document.write(`<img src="${finalImage}" style="width:100%">`);
+  w.print();
+  w.close();
 });
 
-/* retake */
-retakeBtn.addEventListener('click', ()=>{
-  captures = [null,null,null];
-  renderSlots();
-  retakeBtn.disabled = true;
-  downloadBtn.disabled = true;
-  printBtn.disabled = true;
-  qrBtn.disabled = true;
-  downloadFinalBtn.disabled = true;
-  openLinkBtn.disabled = true;
-  qrcodeContainer.innerHTML = 'No QR yet';
+qrBtn.addEventListener("click",()=>{
+  document.getElementById("qrcode").innerHTML="";
+  new QRCode(document.getElementById("qrcode"),{text:finalImage,width:180,height:180});
 });
-
-/* upload 3 images */
-uploadBtn.addEventListener('click', ()=> {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.multiple = true;
-  input.onchange = async (e) => {
-    const files = [...e.target.files].slice(0,3);
-    if(files.length < 3){ alert('เลือก 3 รูป (หรือมากกว่า)'); return; }
-    for(let i=0;i<3;i++){
-      captures[i] = await fileToDataURL(files[i]);
-    }
-    renderSlots();
-    retakeBtn.disabled = false;
-    downloadBtn.disabled = false;
-    printBtn.disabled = false;
-    qrBtn.disabled = false;
-    downloadFinalBtn.disabled = false;
-  };
-  input.click();
-});
-
-function fileToDataURL(file){
-  return new Promise((res, rej)=>{
-    const r = new FileReader();
-    r.onload = ()=> res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-/* build final 4x6 image (1200x1800) */
-async function buildFinalCanvas(){
-  if(!captures[0]) throw new Error('ไม่มีรูป');
-  const W = 1200, H = 1800;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // background cream
-  ctx.fillStyle = '#fffdf8';
-  ctx.fillRect(0,0,W,H);
-
-  // decorative large background panel (blue-ish)
-  ctx.fillStyle = '#dfe9ff';
-  roundRect(ctx, 60, 60, W - 120, H - 120, 22);
-  ctx.fill();
-
-  // header banner (blue pill)
-  ctx.fillStyle = '#a7d8f7';
-  roundRect(ctx, 160, 80, W - 320, 140, 28);
-  ctx.fill();
-
-  // brand text
-  ctx.fillStyle = '#18385f';
-  ctx.font = '64px "Pacifico", serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('TOMOJI PHOTOBOOTH', W/2, 150);
-
-  // 3 slot rect area
-  const slotX = 140;
-  const slotW = W - slotX*2;
-  const gap = 28;
-  const slotH = Math.floor((H - 320 - gap*2) / 3); // compute so overall fits nicely
-  const startY = 240;
-
-  // top: heart clip
-  if(captures[0]){
-    const img0 = await loadImg(captures[0]);
-    // create heart shaped clip
-    ctx.save();
-    clipHeart(ctx, slotX, startY, slotW, slotH);
-    ctx.clip();
-    // draw image covering area (contain)
-    const scale0 = Math.max(slotW / img0.width, slotH / img0.height);
-    const iw0 = img0.width * scale0, ih0 = img0.height * scale0;
-    ctx.drawImage(img0, slotX - (iw0 - slotW)/2, startY - (ih0 - slotH)/2, iw0, ih0);
-    ctx.restore();
-
-    // stroke heart border
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#ffb6d0';
-    ctx.beginPath();
-    clipHeart(ctx, slotX, startY, slotW, slotH);
-    ctx.stroke();
-  }
-
-  // middle: rectangle with rounded corners and label
-  const midY = startY + slotH + gap;
-  if(captures[1]){
-    const img1 = await loadImg(captures[1]);
-    // rounded clip
-    ctx.save();
-    ctx.beginPath();
-    roundRect(ctx, slotX, midY, slotW, slotH, 28);
-    ctx.clip();
-    // draw image - cover / contain aesthetic
-    const scale1 = Math.max(slotW / img1.width, slotH / img1.height);
-    const iw1 = img1.width * scale1, ih1 = img1.height * scale1;
-    ctx.drawImage(img1, slotX - (iw1 - slotW)/2, midY - (ih1 - slotH)/2, iw1, ih1);
-    ctx.restore();
-
-    // rectangle border
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#9fcfff';
-    roundRect(ctx, slotX, midY, slotW, slotH, 28);
-    ctx.stroke();
-
-    // decorative sticker
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(slotX + 18, midY + 12, 120, 42);
-    ctx.fillStyle = '#18385f';
-    ctx.font = '28px "Patrick Hand"';
-    ctx.fillText('MEMORIES', slotX + 18 + 60, midY + 12 + 22);
-  }
-
-  // bottom: star-shaped frame
-  const botY = midY + slotH + gap;
-  if(captures[2]){
-    const img2 = await loadImg(captures[2]);
-    ctx.save();
-    // create star clipping path centered in the bottom rect
-    const cx = slotX + slotW/2;
-    const cy = botY + slotH/2;
-    const outerR = Math.min(slotW, slotH) * 0.45;
-    drawStarPath(ctx, cx, cy, 8, outerR, outerR*0.45);
-    ctx.clip();
-    // draw image covering area
-    const scale2 = Math.max(slotW / img2.width, slotH / img2.height);
-    const iw2 = img2.width * scale2, ih2 = img2.height * scale2;
-    ctx.drawImage(img2, slotX - (iw2 - slotW)/2, botY - (ih2 - slotH)/2, iw2, ih2);
-    ctx.restore();
-
-    // star stroke
-    ctx.lineWidth = 10; ctx.strokeStyle = '#b7ead6';
-    drawStarPath(ctx, cx, cy, 8, outerR, outerR*0.45);
-    ctx.stroke();
-  }
-
-  // small scattered decorative stars/dots
-  for(let i=0;i<40;i++){
-    const rx = 80 + Math.random()*(W-160);
-    const ry = 80 + Math.random()*(H-160);
-    ctx.fillStyle = ['#fff1a8','#ffd6e8','#cfeff0'][Math.floor(Math.random()*3)];
-    ctx.beginPath(); ctx.arc(rx,ry,1 + Math.random()*3,0,Math.PI*2); ctx.fill();
-  }
-
-  // footer credit
-  ctx.fillStyle = '#18385f';
-  ctx.font = '28px "Patrick Hand"';
-  ctx.textAlign = 'center';
-  ctx.fillText('@tomoji studio', W/2, H - 40);
-
-  return canvas;
-}
-
-/* helpers for canvas shapes */
-function roundRect(ctx, x, y, w, h, r){
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
-/* star path - draws but DOES NOT stroke/fill by itself unless called */
-function drawStarPath(ctx, cx, cy, spikes, outerR, innerR){
-  let rot = -Math.PI/2;
-  let step = Math.PI / spikes;
-  ctx.beginPath();
-  for(let i=0;i<spikes;i++){
-    let x = cx + Math.cos(rot) * outerR;
-    let y = cy + Math.sin(rot) * outerR;
-    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    rot += step;
-    x = cx + Math.cos(rot) * innerR;
-    y = cy + Math.sin(rot) * innerR;
-    ctx.lineTo(x,y);
-    rot += step;
-  }
-  ctx.closePath();
-}
-
-/* heart clip implementation: using bezier heart */
-function clipHeart(ctx, x, y, w, h){
-  const cx = x + w/2;
-  const cy = y + h/2.4;
-  const top = y + h*0.18;
-  ctx.beginPath();
-  ctx.moveTo(cx, y + h*0.9);
-  ctx.bezierCurveTo(cx + w*0.6, y + h*0.55, cx + w*0.15, top, cx, top + h*0.02);
-  ctx.bezierCurveTo(cx - w*0.15, top, cx - w*0.6, y + h*0.55, cx, y + h*0.9);
-  ctx.closePath();
-}
-
-/* load image helper */
-function loadImg(src){
-  return new Promise((res, rej)=>{
-    const i = new Image();
-    i.onload = ()=> res(i);
-    i.onerror = rej;
-    i.src = src;
-  });
-}
-
-/* download final canvas as PNG (and create blob URL for QR) */
-async function exportFinal(){
-  try{
-    const canvas = await buildFinalCanvas();
-    return new Promise((resolve, reject)=>{
-      canvas.toBlob((blob)=>{
-        if(!blob) return reject('no blob');
-        if(finalBlobUrl) URL.revokeObjectURL(finalBlobUrl);
-        finalBlobUrl = URL.createObjectURL(blob);
-        resolve({ blob, url: finalBlobUrl, dataUrl: canvas.toDataURL('image/png') });
-      }, 'image/png', 0.95);
-    });
-  }catch(e){
-    console.error(e);
-    throw e;
-  }
-}
-
-/* UI: download / QR / print */
-downloadBtn.addEventListener('click', async ()=>{
-  try{
-    const out = await exportFinal();
-    const a = document.createElement('a');
-    a.href = out.url;
-    a.download = 'tomoji_4x6.png';
-    a.click();
-    // enable other controls
-    downloadFinalBtn.disabled = false;
-    openLinkBtn.disabled = false;
-  }catch(e){ alert('เกิดข้อผิดพลาดในการสร้างไฟล์'); }
-});
-
-downloadFinalBtn.addEventListener('click', ()=>{
-  if(!finalBlobUrl) return alert('ยังไม่มีไฟล์'); const a=document.createElement('a'); a.href=finalBlobUrl; a.download='tomoji_4x6.png'; a.click();
-});
-openLinkBtn.addEventListener('click', ()=> { if(finalBlobUrl) window.open(finalBlobUrl, '_blank'); });
-
-qrBtn.addEventListener('click', async ()=>{
-  try{
-    if(!captures[0]) return alert('ยังไม่มีรูป');
-    const out = await exportFinal(); // create blob/url
-    qrcodeContainer.innerHTML = '';
-    new QRCode(qrcodeContainer, { text: out.url, width: 160, height: 160 });
-    // enable download final panel
-    downloadFinalBtn.disabled = false;
-    openLinkBtn.disabled = false;
-    // also enable print and download
-    printBtn.disabled = false;
-  }catch(e){ alert('ไม่สามารถสร้าง QR ได้'); }
-});
-
-printBtn.addEventListener('click', async ()=>{
-  try{
-    const out = await exportFinal();
-    const w = window.open('');
-    w.document.write('<img src="'+out.url+'" style="width:360px;display:block;margin:0 auto">');
-    w.document.close();
-    w.focus();
-    w.print();
-  }catch(e){ alert('ไม่สามารถพิมพ์ได้'); }
-});
-
-/* upload handler to fill captures */
-uploadBtn.addEventListener('click', async ()=>{
-  const input = document.createElement('input');
-  input.type='file'; input.accept='image/*'; input.multiple=true;
-  input.onchange = async (e)=>{
-    const files = [...e.target.files].slice(0,3);
-    if(files.length < 3){ alert('กรุณาเลือก 3 รูป'); return; }
-    for(let i=0;i<3;i++){ captures[i] = await fileToDataURL(files[i]); }
-    renderSlots();
-    retakeBtn.disabled=false; downloadBtn.disabled=false; qrBtn.disabled=false; printBtn.disabled=false;
-  };
-  input.click();
-});
-
-function fileToDataURL(file){
-  return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = ()=> res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-/* utility: render small slot previews inside the result panel (not final canvas) */
-function renderSlots(){
-  for(let i=0;i<3;i++){
-    if(captures[i]){
-      slotEls[i].innerHTML = `<img src="${captures[i]}">`;
-    }else{
-      // placeholder icons/text
-      slotEls[i].innerHTML = '';
-    }
-  }
-}
-
-/* keyboard: Enter to shoot */
-document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') shutter.click(); });
-
+})();
 </script>
 </body>
 </html>
