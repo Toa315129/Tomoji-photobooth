@@ -1,141 +1,644 @@
-<!doctype html>
-<html lang="th">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tomoji Photobooth</title>
-<style>
-body{
-  background:#fdfaf4;
-  font-family:"Comic Sans MS", "Segoe UI", cursive;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:20px;
-}
-.container{max-width:420px;text-align:center;}
-.preview{position:relative;width:360px;height:540px;margin:0 auto;border:6px solid #a7d8f7;border-radius:16px;overflow:hidden;background:#fff;}
-#video{width:100%;height:100%;object-fit:cover;}
-#overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
-.controls{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
-button{
-  padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
-  background:#ffd6e8;color:#333;transition:0.2s;
-}
-button:hover{background:#90c9a7;color:#fff;}
-#countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:4rem;color:#ff3366;font-weight:bold;text-shadow:2px 2px #fff;}
-#gallery{margin-top:14px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>TOMOJI STUDIO | PHOTOBOOTH</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Quicksand:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Palette: TOMOJI Style (Cream, Brown, Soft Blue) */
+            --bg-paper: #F9F7F2;      
+            --ink-primary: #5D4E3E;   
+            --ink-secondary: #8C7B68; 
+            --accent-blue: #7A9CC6;   
+            --accent-warm: #D4AF37;
+            
+            --font-head: 'Amatic SC', cursive;
+            --font-body: 'Quicksand', sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-paper);
+            color: var(--ink-primary);
+            height: 100vh; height: 100dvh; width: 100vw;
+            overflow: hidden;
+            font-family: var(--font-body);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Background Texture */
+        .paper-bg {
+            position: absolute; inset: 0; z-index: -1;
+            background-image: url('bg_paper.png'); /* ถ้าไม่มีรูปจะแสดงสีพื้น */
+            background-color: var(--bg-paper);
+            background-size: cover;
+            opacity: 0.8;
+        }
+
+        /* Screen States */
+        .screen {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 10;
+        }
+        .screen.active { opacity: 1; pointer-events: auto; }
+
+        /* --- 1. HOME SCREEN --- */
+        #screen-home {
+            justify-content: center; align-items: center; text-align: center;
+        }
+        .main-logo {
+            width: 250px; max-width: 80%; height: auto;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+
+        .btn-start {
+            background: var(--ink-primary); color: #fff; border: none;
+            padding: 15px 60px; font-family: var(--font-head); font-size: 2.5rem;
+            border-radius: 50px; cursor: pointer; 
+            box-shadow: 0 6px 0 var(--ink-secondary);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink-secondary); }
+        
+        .tagline { margin-top: 20px; color: var(--ink-secondary); font-size: 1rem; letter-spacing: 2px; }
+
+        /* --- 1.5 FRAME SELECTION --- */
+        #screen-select-frame {
+            justify-content: center; align-items: center; background: rgba(249, 247, 242, 0.95);
+        }
+        .page-title { font-family: var(--font-head); font-size: 3.5rem; color: var(--ink-primary); margin-bottom: 10px; }
+        .frame-grid {
+            display: flex; gap: 20px; justify-content: center; align-items: center;
+            flex-wrap: wrap; width: 100%; max-width: 900px; padding: 10px;
+        }
+        .frame-option {
+            cursor: pointer; transition: 0.3s;
+            background: #fff; padding: 10px; border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(93, 78, 62, 0.1);
+            display: flex; flex-direction: column; align-items: center;
+            width: 30%; max-width: 150px;
+        }
+        .frame-option img {
+            width: 100%; height: auto; aspect-ratio: 2/3;
+            object-fit: contain; border-radius: 8px; border: 1px dashed var(--ink-secondary);
+            background: #fafafa;
+        }
+        .frame-option:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(122, 156, 198, 0.3); }
+        .frame-label { margin-top: 10px; font-family: var(--font-head); font-size: 1.5rem; }
+
+        /* --- 2. CAMERA SCREEN --- */
+        #screen-cam { background: #222; justify-content: space-between; }
+        
+        .ui-top {
+            position: absolute; top: 0; width: 100%; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 20;
+            color: #fff; font-family: var(--font-body); font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .viewport { 
+            flex: 1; position: relative; overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; width: 100%;
+        }
+        video#video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+
+        /* Tools Sidebar */
+        .cam-sidebar {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 20px; z-index: 30;
+        }
+        .tool-icon {
+            width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(5px);
+            transition: 0.2s; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .tool-icon:active { transform: scale(0.9); background: var(--accent-blue); }
+
+        #countdown {
+            position: absolute; font-family: var(--font-head); font-size: 12rem; color: #fff;
+            display: none; z-index: 100; text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .ui-bottom {
+            height: 160px; width: 100%; background: #fff;
+            border-radius: 30px 30px 0 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 20; position: relative;
+        }
+        
+        /* Filter Selector */
+        .filter-select {
+            display: flex; gap: 15px; margin-bottom: 15px;
+        }
+        .f-item {
+            font-size: 0.8rem; color: #999; cursor: pointer; font-weight: 600;
+        }
+        .f-item.active { color: var(--ink-primary); border-bottom: 2px solid var(--ink-primary); }
+
+        /* Shutter Button */
+        .shutter-outer {
+            width: 75px; height: 75px; border-radius: 50%;
+            border: 4px solid var(--ink-primary); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s;
+        }
+        .shutter-inner { width: 60px; height: 60px; background: var(--ink-primary); border-radius: 50%; }
+        .shutter-outer:active { transform: scale(0.95); }
+
+        /* --- 3. RESULT SCREEN --- */
+        #screen-result {
+            background: var(--bg-paper); flex-direction: row; 
+        }
+        
+        .preview-area {
+            flex: 1; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(#fff, var(--bg-paper));
+            padding: 20px;
+        }
+        .preview-img {
+            max-height: 90%; width: auto; 
+            box-shadow: 0 10px 40px rgba(93, 78, 62, 0.2);
+            transform: rotate(-1deg); border: 8px solid #fff;
+        }
+
+        .control-panel {
+            width: 320px; background: #fff;
+            border-left: 1px dashed var(--ink-secondary);
+            display: flex; flex-direction: column; padding: 30px;
+            justify-content: center; 
+        }
+
+        .result-head { font-family: var(--font-head); font-size: 2.5rem; color: var(--ink-primary); margin-bottom: 5px; }
+        
+        /* Action Buttons */
+        .btn-action {
+            background: #fff; border: 2px solid var(--ink-primary); color: var(--ink-primary);
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; 
+            font-family: var(--font-body); font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-action:hover { background: var(--bg-paper); }
+        .btn-primary { background: var(--ink-primary); color: #fff; }
+        .btn-primary:hover { opacity: 0.9; background: var(--ink-primary); }
+
+        #qr-box { margin: 10px auto; padding: 10px; background: #fff; border: 2px dashed var(--ink-secondary); display: none; }
+        
+        #flash { position: fixed; inset: 0; background: #fff; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
+
+        /* --- PRINT MEDIA --- */
+        #print-only-img { display: none; }
+        @media print {
+            body { visibility: hidden; background: white; margin: 0; }
+            .screen, .paper-bg { display: none !important; }
+            #print-only-img {
+                display: block !important; visibility: visible !important;
+                position: fixed; top: 0; left: 0; height: 100%; width: auto; z-index: 9999;
+            }
+            @page { size: 4in 6in; margin: 0; }
+        }
+
+        /* Mobile Layout */
+        @media (max-width: 900px) {
+            #screen-result { flex-direction: column; overflow-y: auto; }
+            .preview-area { height: 55%; padding: 20px; }
+            .control-panel { width: 100%; height: auto; border-left: none; border-top: 1px dashed var(--ink-secondary); padding: 20px; }
+            .preview-img { max-height: 100%; width: auto; transform: rotate(0); }
+            .frame-option { width: 45%; }
+        }
+    </style>
 </head>
 <body>
-<h1>💖 Tomoji Photobooth 💖</h1>
-<div class="container">
-  <div class="preview">
-    <video id="video" autoplay playsinline></video>
-    <div id="countdown"></div>
-    <!-- กรอบ PNG โปร่งใส -->
-    <img id="overlay" src="IMG_2877.png" alt="กรอบโฟโต้บูธ">
-  </div>
-  <div class="controls">
-    <button id="shutter">📸 เริ่มถ่าย</button>
-    <button id="download" disabled>⬇️ ดาวน์โหลด</button>
-    <button id="print" disabled>🖨️ ปริ้น</button>
-    <button id="makeqr" disabled>🔗 สร้าง QR</button>
-  </div>
-  <div id="gallery"></div>
-  <div id="qrcode"></div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script>
-(async()=>{
-const video=document.getElementById("video");
-const shutter=document.getElementById("shutter");
-const downloadBtn=document.getElementById("download");
-const printBtn=document.getElementById("print");
-const qrBtn=document.getElementById("makeqr");
-const countdownEl=document.getElementById("countdown");
-const gallery=document.getElementById("gallery");
-let stream=null,captures=[],finalImage=null;
+    <div class="paper-bg"></div>
 
-async function startCamera(){
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-    video.srcObject=stream;
-  }catch(e){alert("ไม่สามารถเปิดกล้องได้: "+e);}
-}
-startCamera();
+    <div id="screen-home" class="screen active">
+        <img src="logo.png" class="main-logo" alt="Tomoji Studio" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block'">
+        <div class="logo-text" style="display:none; font-family:var(--font-head); font-size:4rem; color:var(--ink-primary);">TOMOJI STUDIO</div>
+        
+        <button class="btn-start" onclick="OS.goToFrameSelect()">START</button>
+        <div class="tagline">Capture Your Natural Moment</div>
+    </div>
 
-function captureFrame(){
-  const c=document.createElement("canvas");
-  c.width=video.videoWidth; c.height=video.videoHeight;
-  const ctx=c.getContext("2d");
-  ctx.drawImage(video,0,0,c.width,c.height);
-  return c.toDataURL("image/png");
-}
+    <div id="screen-select-frame" class="screen">
+        <div class="page-title">Pick Your Frame</div>
+        <div style="color:var(--ink-secondary)">Choose your favorite style</div>
+        
+        <div class="frame-grid">
+            <div class="frame-option" onclick="OS.selectFrame('frame1.png')">
+                <img src="frame1.png" alt="Style 1" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+1'">
+                <div class="frame-label">Style 01</div>
+            </div>
+            <div class="frame-option" onclick="OS.selectFrame('frame2.png')">
+                <img src="frame2.png" alt="Style 2" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+2'">
+                <div class="frame-label">Style 02</div>
+            </div>
+            <div class="frame-option" onclick="OS.selectFrame('frame3.png')">
+                <img src="frame3.png" alt="Style 3" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+3'">
+                <div class="frame-label">Style 03</div>
+            </div>
+        </div>
+    </div>
 
-function showCount(n){countdownEl.textContent=n;}
-function hideCount(){countdownEl.textContent="";}
+    <div id="screen-cam" class="screen">
+        <div class="ui-top">
+            <span style="color:var(--accent-warm);">● REC</span>
+            <span id="clock">00:00</span>
+        </div>
 
-async function takeSequence(){
-  captures=[];
-  for(let i=0;i<2;i++){
-    for(let s=3;s>=1;s--){showCount(s);await new Promise(r=>setTimeout(r,1000));}
-    hideCount();
-    captures.push(captureFrame());
-    if(i<1) await new Promise(r=>setTimeout(r,1000)); // เว้น 1 วิ
-  }
-  await buildFinal();
-  downloadBtn.disabled=false;
-  printBtn.disabled=false;
-  qrBtn.disabled=false;
-}
+        <div class="viewport">
+            <video id="video-feed" autoplay playsinline muted></video>
+            <div id="countdown">3</div>
+            
+            <div class="cam-sidebar">
+                <div class="tool-icon" onclick="OS.toggleCamFlip()">↺</div>
+                <div class="tool-icon" onclick="OS.toggleTimer()" id="btn-timer" style="font-size:1rem; font-weight:bold;">3s</div>
+                <div class="tool-icon" onclick="OS.toggleFlash()">⚡</div>
+            </div>
+        </div>
 
-async function buildFinal(){
-  const overlay=document.getElementById("overlay");
-  const frame=await loadImage(overlay.src);
+        <div class="ui-bottom">
+            <div class="filter-select">
+                <div class="f-item active" onclick="OS.filter('normal', this)">Original</div>
+                <div class="f-item" onclick="OS.filter('soft', this)">Soft</div>
+                <div class="f-item" onclick="OS.filter('bw', this)">Mono</div>
+                <div class="f-item" onclick="OS.filter('warm', this)">Warm</div>
+            </div>
+            <div class="shutter-outer" onclick="OS.snap()">
+                <div class="shutter-inner"></div>
+            </div>
+        </div>
+    </div>
 
-  const W=frame.width,H=frame.height;
-  const c=document.createElement("canvas");
-  c.width=W; c.height=H;
-  const ctx=c.getContext("2d");
+    <div id="screen-result" class="screen">
+        <div class="preview-area">
+            <img id="final-img" class="preview-img" alt="Result">
+        </div>
 
-  // ช่องบน
-  const img1=await loadImage(captures[0]);
-  ctx.drawImage(img1,80,80, W-160, (H/2)-120);
+        <div class="control-panel">
+            <div class="result-head">Tomoji Studio</div>
+            <div style="font-size:0.9rem; color:#888; margin-bottom:20px;">Memories Saved.</div>
 
-  // ช่องล่าง
-  const img2=await loadImage(captures[1]);
-  ctx.drawImage(img2,80,(H/2)+40, W-160, (H/2)-120);
+            <div id="qr-box">
+                <div id="qrcode"></div>
+            </div>
 
-  // กรอบทับ
-  ctx.drawImage(frame,0,0,W,H);
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span id="log-text" style="font-size:0.8rem; color:#aaa;">Processing...</span>
+            </div>
 
-  finalImage=c.toDataURL("image/png");
-  gallery.innerHTML=`<img src="${finalImage}" style="width:100%;border:6px solid #90c9a7;border-radius:16px">`;
-}
+            <button class="btn-action btn-primary" onclick="OS.printPhoto()">🖨️ Print Photo</button>
+            <button class="btn-action" onclick="OS.download()">📥 Save Image</button>
+            <button class="btn-action" onclick="OS.downloadVideo()">🎥 Save Video</button>
+            <button class="btn-action" onclick="OS.restart()" style="border:none; color:#999; margin-top:10px;">Take New Photo</button>
+        </div>
+    </div>
 
-function loadImage(src){
-  return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});
-}
+    <div id="flash"></div>
+    <img id="print-only-img" src="" alt="Print">
+    <canvas id="hidden-canvas" style="display:none;"></canvas>
 
-shutter.addEventListener("click",takeSequence);
+    <script>
+        const OS = (function() {
+            // --- CONFIGURATION ---
+            const API_KEY = 'ffc90ad0bc5c7e0c056b68ef7430304a'; // ImgBB API Key
+            const C = { 
+                stripW: 1200,    // ความกว้างรูปผลลัพธ์ (ยิ่งเยอะยิ่งชัดตอนปริ้น)
+                shots: 3,        // จำนวนช็อตที่ถ่าย
+                gap: 35,         // ช่องว่างระหว่างรูป
+                topMargin: 250,  // ระยะเว้นขอบบน (สำหรับหัวกระดาษ)
+                btmMargin: 150   // ระยะเว้นขอบล่าง
+            };
+            
+            let s = { 
+                filter: 'normal', 
+                frameImg: null,  // เก็บรูปกรอบที่เลือก
+                photos: [], 
+                stream: null, 
+                processing: false, 
+                timer: 3, 
+                flash: true, 
+                facingMode: 'user', 
+                mirror: true 
+            };
 
-downloadBtn.addEventListener("click",()=>{
-  const a=document.createElement("a");a.href=finalImage;a.download="photobooth.png";a.click();
-});
+            const D = {
+                screens: { 
+                    home: document.getElementById('screen-home'), 
+                    select: document.getElementById('screen-select-frame'),
+                    cam: document.getElementById('screen-cam'), 
+                    res: document.getElementById('screen-result') 
+                },
+                video: document.getElementById('video-feed'), 
+                canvas: document.getElementById('hidden-canvas'), 
+                count: document.getElementById('countdown'),
+                flash: document.getElementById('flash'), 
+                final: document.getElementById('final-img'), 
+                btnTimer: document.getElementById('btn-timer'),
+                printImg: document.getElementById('print-only-img')
+            };
 
-printBtn.addEventListener("click",()=>{
-  const w=window.open("");
-  w.document.write(`<img src="${finalImage}" style="width:100%">`);
-  w.print();
-  w.close();
-});
+            // Audio Effect
+            const Aud = {
+                ctx: null,
+                init: function() { if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
+                play: function(type) {
+                    this.init(); if(this.ctx.state === 'suspended') this.ctx.resume();
+                    const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+                    o.connect(g); g.connect(this.ctx.destination);
+                    const t = this.ctx.currentTime;
+                    if(type === 'shutter') {
+                        // เสียงชัตเตอร์กล้อง
+                        const n = this.ctx.createBufferSource(); 
+                        const b = this.ctx.createBuffer(1, this.ctx.sampleRate*0.1, this.ctx.sampleRate);
+                        const d = b.getChannelData(0); 
+                        for(let i=0;i<b.length;i++) d[i]=Math.random()*2-1;
+                        n.buffer=b; n.connect(g); g.gain.value=0.3; n.start(t);
+                    } else {
+                        // เสียงติ๊ด (Countdown)
+                        o.frequency.value = 800; g.gain.value = 0.1; 
+                        o.start(t); o.stop(t+0.1);
+                    }
+                }
+            };
 
-qrBtn.addEventListener("click",()=>{
-  document.getElementById("qrcode").innerHTML="";
-  new QRCode(document.getElementById("qrcode"),{text:finalImage,width:180,height:180});
-});
-})();
-</script>
+            // --- NAVIGATION ---
+            function switchScreen(name) { 
+                Object.values(D.screens).forEach(s => s.classList.remove('active')); 
+                D.screens[name].classList.add('active'); 
+            }
+
+            function goToFrameSelect() { switchScreen('select'); }
+
+            function selectFrame(url) {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = url;
+                img.onload = () => { s.frameImg = img; startCam(); };
+                img.onerror = () => { 
+                    console.warn("Frame image not found ("+url+"). Proceeding without frame."); 
+                    s.frameImg = null; startCam(); 
+                };
+            }
+
+            // --- CAMERA LOGIC ---
+            async function startCam() {
+                try {
+                    s.stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: s.facingMode, width: {ideal: 1920}, height: {ideal: 1080} }, 
+                        audio: false 
+                    });
+                    D.video.srcObject = s.stream; 
+                    updateMirror();
+                    switchScreen('cam');
+                    startClock();
+                } catch(e) { alert("Camera Error: Please allow camera access."); }
+            }
+
+            function startClock() {
+                setInterval(() => { 
+                    const d = new Date(); 
+                    document.getElementById('clock').innerText = 
+                        d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0'); 
+                }, 1000);
+            }
+
+            function toggleCamFlip() { s.facingMode = (s.facingMode === 'user') ? 'environment' : 'user'; s.stream.getTracks().forEach(t=>t.stop()); startCam(); }
+            function toggleTimer() { const timers = [3, 5, 10]; s.timer = timers[(timers.indexOf(s.timer)+1) % timers.length]; D.btnTimer.innerText = s.timer + "s"; }
+            function toggleFlash() { s.flash = !s.flash; document.querySelector('.tool-icon:last-child').style.opacity = s.flash?1:0.3; }
+            function toggleMirror() { s.mirror = !s.mirror; updateMirror(); }
+            function updateMirror() { D.video.style.transform = s.mirror ? "scaleX(-1)" : "scaleX(1)"; }
+
+            function filter(mode, btn) {
+                s.filter = mode; 
+                document.querySelectorAll('.f-item').forEach(b => b.classList.remove('active')); 
+                btn.classList.add('active');
+                let css = 'none';
+                if(mode==='soft') css = 'contrast(0.9) brightness(1.1) saturate(0.9)';
+                if(mode==='bw') css = 'grayscale(100%) contrast(1.1)';
+                if(mode==='warm') css = 'sepia(0.3) contrast(1.05) saturate(0.9)';
+                D.video.style.filter = css;
+            }
+
+            // --- SHOOTING PROCESS ---
+            async function snap() {
+                if(s.processing) return; s.processing = true; s.photos = [];
+                for(let i=0; i<C.shots; i++) { 
+                    await countdown(s.timer); 
+                    await capture(); 
+                    await new Promise(r => setTimeout(r, 800)); // Delay between shots
+                }
+                processResult();
+            }
+
+            function countdown(n) {
+                return new Promise(r => {
+                    let c = n; D.count.style.display = 'block'; D.count.innerText = c; 
+                    Aud.play('beep');
+                    const t = setInterval(() => { 
+                        c--; 
+                        if(c>0) { D.count.innerText = c; Aud.play('beep'); } 
+                        else { clearInterval(t); D.count.style.display = 'none'; r(); } 
+                    }, 1000);
+                });
+            }
+
+            function capture() {
+                return new Promise(r => {
+                    Aud.play('shutter');
+                    if(s.flash) { D.flash.style.opacity=1; setTimeout(() => D.flash.style.opacity=0, 150); }
+                    
+                    const cvs = document.createElement('canvas'); 
+                    cvs.width = D.video.videoWidth; cvs.height = D.video.videoHeight;
+                    const ctx = cvs.getContext('2d');
+                    
+                    if(s.mirror) { ctx.translate(cvs.width, 0); ctx.scale(-1, 1); }
+                    ctx.drawImage(D.video, 0, 0);
+                    
+                    // Apply Filter to Canvas
+                    if(s.filter !== 'normal') {
+                        const id = ctx.getImageData(0,0,cvs.width,cvs.height); const d = id.data;
+                        for(let i=0; i<d.length; i+=4) {
+                            let R=d[i], G=d[i+1], B=d[i+2];
+                            if(s.filter === 'bw') { const v = 0.299*R + 0.587*G + 0.114*B; d[i]=d[i+1]=d[i+2]=v; }
+                            else if(s.filter === 'warm') { 
+                                d[i] = R*0.393+G*0.769+B*0.189; 
+                                d[i+1] = R*0.349+G*0.686+B*0.168; 
+                                d[i+2] = R*0.272+G*0.534+B*0.131; 
+                            }
+                            // Soft filter is mostly CSS based, simpler to skip pixel logic for speed or use simplified version
+                        }
+                        ctx.putImageData(id, 0, 0);
+                    }
+                    s.photos.push(cvs); 
+                    setTimeout(r, 200);
+                });
+            }
+
+            // --- RESULT GENERATION ---
+            function processResult() {
+                generateStripCanvas();
+                const finalUrl = D.canvas.toDataURL('image/jpeg', 0.95);
+                D.final.src = finalUrl;
+                switchScreen('res');
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors:['#5D4E3E', '#8C7B68', '#F9F7F2'] });
+                handleUpload(finalUrl);
+            }
+
+            function generateStripCanvas(shiftOrder = 0) {
+                // คำนวณขนาดภาพ
+                const stripW = C.stripW; 
+                const photoW = stripW * 0.85; // รูปกว้าง 85% ของกรอบ
+                const photoH = (photoW * 3) / 4; // สัดส่วน 4:3
+                
+                // คำนวณความสูงรวม (ถ้ามีรูปกรอบ ใช้รูปกรอบเป็นตัวตั้ง ถ้าไม่มีใช้ค่าคำนวณ)
+                let H;
+                if (s.frameImg) {
+                    // ปรับขนาด Canvas ให้เท่ากับ Ratio ของ Frame รูปที่ใส่มา
+                    const ratio = s.frameImg.height / s.frameImg.width;
+                    H = stripW * ratio;
+                } else {
+                    H = C.topMargin + (photoH * C.shots) + (C.gap * (C.shots-1)) + C.btmMargin;
+                }
+
+                D.canvas.width = stripW; D.canvas.height = H;
+                const ctx = D.canvas.getContext('2d');
+                
+                // 1. Fill Background
+                ctx.fillStyle = '#F9F7F2'; 
+                ctx.fillRect(0,0,stripW,H);
+
+                // 2. Draw Photos
+                // Logic จัดเรียงรูป (สำหรับทำวิดีโอ shiftOrder จะเลื่อนรูป)
+                let displayPhotos = [...s.photos];
+                for(let i=0; i<shiftOrder; i++) displayPhotos.unshift(displayPhotos.pop());
+
+                // คำนวณตำแหน่งเริ่มวางรูป (กึ่งกลางแกน X)
+                const startX = (stripW - photoW) / 2;
+                
+                // ถ้ามีกรอบ เราต้องเดาว่าช่องว่างอยู่ตรงไหน 
+                // แต่เพื่อความง่าย เราจะวางรูปไว้ตำแหน่ง Center แล้วแปะกรอบทับ
+                // วิธี Tomoji: วางรูปลงไปก่อน แล้วเอากรอบทับ
+                
+                // คำนวณจุดเริ่ม Y (Manual Adjust: คุณอาจต้องแก้ตรงนี้ถ้ากรอบคุณมี Header ใหญ่มาก)
+                let currentY = (H - (photoH*C.shots + C.gap*(C.shots-1))) / 2; 
+                // หากกรอบ 1,2,3 ตำแหน่งช่องไม่เท่ากัน แนะนำให้ทำรูปกรอบให้มีช่องว่างเท่าๆ กัน
+                
+                displayPhotos.forEach(p => {
+                    // Center Crop logic
+                    const sR = p.width/p.height, dR = 4/3;
+                    let sx, sy, sw, sh;
+                    if(sR > dR) { sh=p.height; sw=sh*dR; sx=(p.width-sw)/2; sy=0; } 
+                    else { sw=p.width; sh=sw/dR; sx=0; sy=(p.height-sh)/2; }
+                    
+                    ctx.drawImage(p, sx, sy, sw, sh, startX, currentY, photoW, photoH);
+                    currentY += photoH + C.gap;
+                });
+
+                // 3. Draw Frame Overlay
+                if(s.frameImg) {
+                    ctx.drawImage(s.frameImg, 0, 0, stripW, H);
+                } else {
+                    // Fallback Text ถ้าไม่เจอกรอบ
+                    ctx.fillStyle = "#5D4E3E"; ctx.font = "bold 80px 'Amatic SC'"; ctx.textAlign = "center";
+                    ctx.fillText("TOMOJI STUDIO", stripW/2, 150);
+                }
+            }
+
+            // --- EXPORT & PRINT ---
+            async function handleUpload(base64) {
+                const log = document.getElementById('log-text');
+                try {
+                    const fd = new FormData(); fd.append("image", base64.split(',')[1]); 
+                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, { method: "POST", body: fd });
+                    const data = await res.json();
+                    if (data.success) {
+                        log.innerText = "QR Ready!";
+                        document.getElementById('qrcode').innerHTML = "";
+                        new QRCode(document.getElementById("qrcode"), { 
+                            text: data.data.url, width: 100, height: 100, 
+                            colorDark : "#5D4E3E", colorLight : "#FFF" 
+                        });
+                        document.getElementById('qr-box').style.display = 'block';
+                    }
+                } catch (err) { log.innerText = "Upload Failed (Save manually)"; }
+            }
+
+            function download() { 
+                const a = document.createElement('a'); 
+                a.download = `TOMOJI_${Date.now()}.jpg`; 
+                a.href = D.final.src; 
+                a.click(); 
+            }
+
+            function printPhoto() {
+                D.printImg.src = D.final.src;
+                // รอให้ภาพโหลดเข้า img tag เสร็จก่อนสั่งปริ้น
+                setTimeout(() => { window.print(); }, 500);
+            }
+
+            async function downloadVideo() {
+                if(s.processing) return;
+                const log = document.getElementById('log-text');
+                log.innerText = "Generating Video...";
+                try {
+                    // Capture Canvas Stream
+                    const stream = D.canvas.captureStream(30);
+                    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                    const chunks = [];
+                    recorder.ondataavailable = e => chunks.push(e.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'video/webm' }); 
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a'); a.href = url; 
+                        a.download = `TOMOJI_MOMENT_${Date.now()}.webm`;
+                        a.click();
+                        // Restore original view
+                        generateStripCanvas(0); 
+                        D.final.src = D.canvas.toDataURL('image/jpeg', 0.95);
+                        log.innerText = "Video Saved!";
+                    };
+                    
+                    recorder.start();
+                    
+                    // Animation Loop for Video
+                    let startT = Date.now(); 
+                    let shift = 0;
+                    const anim = setInterval(() => { 
+                        if (Date.now() - startT >= 4000) { // อัด 4 วินาที
+                            clearInterval(anim); recorder.stop(); 
+                        } else {
+                            // สลับรูปทุก 0.5 วินาที
+                            if(Date.now() % 500 < 50) { 
+                                shift++; generateStripCanvas(shift); 
+                            }
+                        }
+                    }, 33); 
+                } catch(e) { alert("Video save not supported on this device/browser."); log.innerText=""; }
+            }
+
+            function restart() { location.reload(); }
+
+            return { goToFrameSelect, selectFrame, toggleCamFlip, toggleTimer, toggleFlash, toggleMirror, filter, snap, download, restart, downloadVideo, printPhoto };
+        })();
+    </script>
 </body>
 </html>
