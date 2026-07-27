@@ -1,31 +1,30 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>TOMOJI STUDIO | Premium Photobooth Experience</title>
+    <title>TOMOJI STUDIO | PHOTOBOOTH</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Quicksand:wght@400;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Quicksand:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-paper: #FDFBF7;      
-            --ink-primary: #4A3E3D;   
+            /* Palette: TOMOJI Style (Cream, Brown, Soft Blue) */
+            --bg-paper: #F9F7F2;      
+            --ink-primary: #5D4E3E;   
             --ink-secondary: #8C7B68; 
-            --accent-blue: #88A2B9;   
-            --accent-warm: #E29578;
-            --accent-gold: #D4AF37;
-            --card-bg: rgba(255, 255, 255, 0.85);
+            --accent-blue: #7A9CC6;   
+            --accent-warm: #D4AF37;
             
             --font-head: 'Amatic SC', cursive;
             --font-body: 'Quicksand', sans-serif;
-            --font-hand: 'Caveat', cursive;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -40,178 +39,173 @@
             display: flex; justify-content: center; align-items: center;
         }
 
+        /* Background Texture */
         .paper-bg {
             position: absolute; inset: 0; z-index: -1;
+            background-image: url('bg_paper.png'); /* ถ้าไม่มีรูปจะแสดงสีพื้น */
             background-color: var(--bg-paper);
-            background-image: radial-gradient(#E8E2D5 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.6;
+            background-size: cover;
+            opacity: 0.8;
         }
 
+        /* Screen States */
         .screen {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             opacity: 0; pointer-events: none;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.5s ease-in-out;
             z-index: 10;
         }
         .screen.active { opacity: 1; pointer-events: auto; }
 
-        /* --- UI COMPONENTS & BUTTONS --- */
-        .btn-main {
-            background: var(--ink-primary); color: #fff; border: none;
-            padding: 16px 45px; font-family: var(--font-head); font-size: 2.2rem;
-            border-radius: 50px; cursor: pointer; letter-spacing: 1px;
-            box-shadow: 0 8px 20px rgba(74, 62, 61, 0.25);
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-flex; align-items: center; gap: 10px;
+        /* --- 1. HOME SCREEN --- */
+        #screen-home {
+            justify-content: center; align-items: center; text-align: center;
         }
-        .btn-main:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(74, 62, 61, 0.2); }
-
-        /* --- HOME SCREEN --- */
-        #screen-home { justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        .main-logo { width: 220px; max-width: 70%; height: auto; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        .main-logo {
+            width: 250px; max-width: 80%; height: auto;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
         @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
-        .tagline { margin-top: 15px; color: var(--ink-secondary); font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase; }
 
-        /* --- FRAME & LAYOUT SELECT --- */
-        #screen-select-frame { justify-content: flex-start; align-items: center; padding: 40px 20px; overflow-y: auto; }
-        .page-title { font-family: var(--font-head); font-size: 3.5rem; color: var(--ink-primary); margin: 0; }
-        
-        .section-label { font-weight: 700; margin: 15px 0 10px; color: var(--ink-secondary); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1.5px; }
-        
-        .layout-selector { display: flex; gap: 12px; margin-bottom: 20px; }
-        .layout-btn {
-            background: #fff; border: 2px solid #E5DFD5; padding: 8px 18px; border-radius: 20px;
-            font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem;
+        .btn-start {
+            background: var(--ink-primary); color: #fff; border: none;
+            padding: 15px 60px; font-family: var(--font-head); font-size: 2.5rem;
+            border-radius: 50px; cursor: pointer; 
+            box-shadow: 0 6px 0 var(--ink-secondary);
+            transition: transform 0.1s, box-shadow 0.1s;
         }
-        .layout-btn.active { background: var(--ink-primary); color: #fff; border-color: var(--ink-primary); }
+        .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink-secondary); }
+        
+        .tagline { margin-top: 20px; color: var(--ink-secondary); font-size: 1rem; letter-spacing: 2px; }
 
+        /* --- 1.5 FRAME SELECTION --- */
+        #screen-select-frame {
+            justify-content: center; align-items: center; background: rgba(249, 247, 242, 0.95);
+        }
+        .page-title { font-family: var(--font-head); font-size: 3.5rem; color: var(--ink-primary); margin-bottom: 10px; }
         .frame-grid {
             display: flex; gap: 20px; justify-content: center; align-items: center;
-            flex-wrap: wrap; width: 100%; max-width: 900px;
+            flex-wrap: wrap; width: 100%; max-width: 900px; padding: 10px;
         }
         .frame-option {
-            cursor: pointer; transition: all 0.3s;
-            background: #fff; padding: 12px; border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; align-items: center; width: 28%; min-width: 140px;
-            border: 2px solid transparent;
+            cursor: pointer; transition: 0.3s;
+            background: #fff; padding: 10px; border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(93, 78, 62, 0.1);
+            display: flex; flex-direction: column; align-items: center;
+            width: 30%; max-width: 150px;
         }
-        .frame-option:hover, .frame-option.selected { border-color: var(--accent-blue); transform: translateY(-5px); }
-        .frame-option img { width: 100%; height: auto; aspect-ratio: 2/3; object-fit: contain; border-radius: 8px; background: #fafafa; }
-        .frame-label { margin-top: 10px; font-family: var(--font-head); font-size: 1.6rem; }
+        .frame-option img {
+            width: 100%; height: auto; aspect-ratio: 2/3;
+            object-fit: contain; border-radius: 8px; border: 1px dashed var(--ink-secondary);
+            background: #fafafa;
+        }
+        .frame-option:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(122, 156, 198, 0.3); }
+        .frame-label { margin-top: 10px; font-family: var(--font-head); font-size: 1.5rem; }
 
-        /* --- CAMERA SCREEN --- */
-        #screen-cam { background: #121212; justify-content: space-between; }
+        /* --- 2. CAMERA SCREEN --- */
+        #screen-cam { background: #222; justify-content: space-between; }
+        
         .ui-top {
             position: absolute; top: 0; width: 100%; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 25;
-            color: #fff; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            display: flex; justify-content: space-between; align-items: center; z-index: 20;
+            color: #fff; font-family: var(--font-body); font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        .viewport { flex: 1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; width: 100%; }
+        .viewport { 
+            flex: 1; position: relative; overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; width: 100%;
+        }
         video#video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        
-        /* Overlay Live Frame */
-        #live-frame-overlay {
-            position: absolute; inset: 0; width: 100%; height: 100%;
-            object-fit: contain; pointer-events: none; z-index: 15; opacity: 0.85;
-        }
 
+        /* Tools Sidebar */
         .cam-sidebar {
             position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px; z-index: 30;
+            display: flex; flex-direction: column; gap: 20px; z-index: 30;
         }
         .tool-icon {
-            width: 48px; height: 48px; background: rgba(0,0,0,0.4); border-radius: 50%;
+            width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(8px);
-            transition: 0.2s; border: 1px solid rgba(255,255,255,0.25);
+            color: #fff; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(5px);
+            transition: 0.2s; border: 1px solid rgba(255,255,255,0.2);
         }
         .tool-icon:active { transform: scale(0.9); background: var(--accent-blue); }
 
         #countdown {
-            position: absolute; font-family: var(--font-head); font-size: 14rem; color: #fff;
-            display: none; z-index: 100; text-shadow: 0 5px 20px rgba(0,0,0,0.8);
-            animation: pulse 1s infinite alternate;
+            position: absolute; font-family: var(--font-head); font-size: 12rem; color: #fff;
+            display: none; z-index: 100; text-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        @keyframes pulse { 0% { transform: scale(0.9); } 100% { transform: scale(1.1); } }
-
-        /* Shots Retake Tray */
-        .shots-preview-tray {
-            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 10px; z-index: 30;
-        }
-        .shot-thumb {
-            width: 55px; height: 75px; border-radius: 8px; border: 2px solid #fff;
-            object-fit: cover; background: rgba(255,255,255,0.2); cursor: pointer; transition: 0.2s;
-            position: relative; overflow: hidden;
-        }
-        .shot-thumb.active { border-color: var(--accent-warm); transform: scale(1.1); }
-        .shot-thumb::after { content: "↺"; position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: #fff; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; }
-        .shot-thumb:hover::after { opacity: 1; }
 
         .ui-bottom {
-            height: 170px; width: 100%; background: #fff;
+            height: 160px; width: 100%; background: #fff;
             border-radius: 30px 30px 0 0;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 20; position: relative; padding: 10px 0;
+            z-index: 20; position: relative;
         }
         
-        .filter-select { display: flex; gap: 12px; margin-bottom: 12px; overflow-x: auto; max-width: 90%; padding: 5px; }
-        .f-item { font-size: 0.85rem; color: #888; cursor: pointer; font-weight: 600; white-space: nowrap; padding: 4px 10px; border-radius: 12px; }
-        .f-item.active { color: var(--ink-primary); background: #EFECE6; }
+        /* Filter Selector */
+        .filter-select {
+            display: flex; gap: 15px; margin-bottom: 15px;
+        }
+        .f-item {
+            font-size: 0.8rem; color: #999; cursor: pointer; font-weight: 600;
+        }
+        .f-item.active { color: var(--ink-primary); border-bottom: 2px solid var(--ink-primary); }
 
+        /* Shutter Button */
         .shutter-outer {
             width: 75px; height: 75px; border-radius: 50%;
             border: 4px solid var(--ink-primary); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; background: #fff;
+            cursor: pointer; transition: 0.2s;
         }
-        .shutter-inner { width: 58px; height: 58px; background: var(--ink-primary); border-radius: 50%; transition: 0.2s; }
-        .shutter-outer:active .shutter-inner { transform: scale(0.85); background: var(--accent-warm); }
+        .shutter-inner { width: 60px; height: 60px; background: var(--ink-primary); border-radius: 50%; }
+        .shutter-outer:active { transform: scale(0.95); }
 
-        /* --- RESULT SCREEN --- */
-        #screen-result { background: var(--bg-paper); flex-direction: row; }
+        /* --- 3. RESULT SCREEN --- */
+        #screen-result {
+            background: var(--bg-paper); flex-direction: row; 
+        }
         
         .preview-area {
-            flex: 1; height: 100%; display: flex; justify-content: center; align-items: center;
-            background: radial-gradient(#fff, #EFECE6); padding: 30px; position: relative;
+            flex: 1; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(#fff, var(--bg-paper));
+            padding: 20px;
         }
-        .preview-container { position: relative; max-height: 90%; display: flex; justify-content: center; align-items: center; }
-        .preview-img { max-height: 85vh; width: auto; box-shadow: 0 15px 35px rgba(74, 62, 61, 0.15); border-radius: 4px; }
+        .preview-img {
+            max-height: 90%; width: auto; 
+            box-shadow: 0 10px 40px rgba(93, 78, 62, 0.2);
+            transform: rotate(-1deg); border: 8px solid #fff;
+        }
 
         .control-panel {
-            width: 360px; background: #fff; border-left: 1px solid #E5DFD5;
-            display: flex; flex-direction: column; padding: 30px; justify-content: space-between; overflow-y: auto;
+            width: 320px; background: #fff;
+            border-left: 1px dashed var(--ink-secondary);
+            display: flex; flex-direction: column; padding: 30px;
+            justify-content: center; 
         }
 
-        .result-head { font-family: var(--font-head); font-size: 2.8rem; color: var(--ink-primary); margin: 0; line-height: 1; }
+        .result-head { font-family: var(--font-head); font-size: 2.5rem; color: var(--ink-primary); margin-bottom: 5px; }
         
+        /* Action Buttons */
         .btn-action {
             background: #fff; border: 2px solid var(--ink-primary); color: var(--ink-primary);
-            width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 14px; 
-            font-family: var(--font-body); font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.95rem;
-            transition: all 0.2s;
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; 
+            font-family: var(--font-body); font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
         }
-        .btn-action:hover { background: var(--bg-paper); transform: translateY(-2px); }
-        .btn-primary { background: var(--ink-primary); color: #fff; border-color: var(--ink-primary); }
-        .btn-primary:hover { background: #362D2C; }
+        .btn-action:hover { background: var(--bg-paper); }
+        .btn-primary { background: var(--ink-primary); color: #fff; }
+        .btn-primary:hover { opacity: 0.9; background: var(--ink-primary); }
 
-        /* Sticker Decorator Overlay Toolbar */
-        .decorator-tools { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px; }
-        .sticker-btn { font-size: 1.5rem; background: #F5F2EC; border: none; padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-        .sticker-btn:hover { transform: scale(1.2); background: #E8E2D5; }
-
-        #qr-box {
-            margin: 10px 0; padding: 15px; background: #FAF8F5; border: 2px dashed var(--ink-secondary);
-            border-radius: 12px; display: none; text-align: center; align-items: center; justify-content: center; flex-direction: column;
-        }
+        #qr-box { margin: 10px auto; padding: 10px; background: #fff; border: 2px dashed var(--ink-secondary); display: none; }
         
         #flash { position: fixed; inset: 0; background: #fff; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
 
-        /* Print Settings */
+        /* --- PRINT MEDIA --- */
         #print-only-img { display: none; }
         @media print {
             body { visibility: hidden; background: white; margin: 0; }
@@ -223,10 +217,12 @@
             @page { size: 4in 6in; margin: 0; }
         }
 
+        /* Mobile Layout */
         @media (max-width: 900px) {
             #screen-result { flex-direction: column; overflow-y: auto; }
-            .preview-area { height: 50vh; padding: 15px; }
-            .control-panel { width: 100%; height: auto; border-left: none; border-top: 1px solid #E5DFD5; padding: 20px; }
+            .preview-area { height: 55%; padding: 20px; }
+            .control-panel { width: 100%; height: auto; border-left: none; border-top: 1px dashed var(--ink-secondary); padding: 20px; }
+            .preview-img { max-height: 100%; width: auto; transform: rotate(0); }
             .frame-option { width: 45%; }
         }
     </style>
@@ -235,78 +231,57 @@
 
     <div class="paper-bg"></div>
 
-    <!-- 1. HOME SCREEN -->
     <div id="screen-home" class="screen active">
-        <img src="logo.png" class="main-logo" alt="Tomoji Studio" onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='block'">
-        <div class="logo-fallback" style="display:none; font-family:var(--font-head); font-size:5rem; color:var(--ink-primary); line-height:1;">TOMOJI STUDIO</div>
+        <img src="logo.png" class="main-logo" alt="Tomoji Studio" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block'">
+        <div class="logo-text" style="display:none; font-family:var(--font-head); font-size:4rem; color:var(--ink-primary);">TOMOJI STUDIO</div>
         
-        <button class="btn-main" onclick="OS.goToFrameSelect()">
-            <span>GET STARTED</span> ➔
-        </button>
-        <div class="tagline">Capture Your Purest Moments</div>
+        <button class="btn-start" onclick="OS.goToFrameSelect()">START</button>
+        <div class="tagline">Capture Your Natural Moment</div>
     </div>
 
-    <!-- 1.5 FRAME & LAYOUT SELECT -->
     <div id="screen-select-frame" class="screen">
-        <div class="page-title">Select Style</div>
+        <div class="page-title">Pick Your Frame</div>
+        <div style="color:var(--ink-secondary)">Choose your favorite style</div>
         
-        <div class="section-label">1. Choose Photo Layout</div>
-        <div class="layout-selector">
-            <button class="layout-btn active" onclick="OS.setLayout('strip-3', this)">3-Cut Strip</button>
-            <button class="layout-btn" onclick="OS.setLayout('strip-4', this)">4-Cut Strip</button>
-            <button class="layout-btn" onclick="OS.setLayout('grid-2x2', this)">2x2 Grid</button>
-        </div>
-
-        <div class="section-label">2. Pick Frame Concept</div>
         <div class="frame-grid">
-            <div class="frame-option selected" onclick="OS.selectFrame('frame1.png', this)">
-                <img src="frame1.png" alt="Style 1" onerror="this.src='https://placehold.co/400x600/F5F2EC/5D4E3E?text=Classic+Cream'">
+            <div class="frame-option" onclick="OS.selectFrame('frame1.png')">
+                <img src="frame1.png" alt="Style 1" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+1'">
                 <div class="frame-label">Style 01</div>
             </div>
-            <div class="frame-option" onclick="OS.selectFrame('frame2.png', this)">
-                <img src="frame2.png" alt="Style 2" onerror="this.src='https://placehold.co/400x600/F5F2EC/5D4E3E?text=Soft+Blue'">
+            <div class="frame-option" onclick="OS.selectFrame('frame2.png')">
+                <img src="frame2.png" alt="Style 2" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+2'">
                 <div class="frame-label">Style 02</div>
             </div>
-            <div class="frame-option" onclick="OS.selectFrame('frame3.png', this)">
-                <img src="frame3.png" alt="Style 3" onerror="this.src='https://placehold.co/400x600/F5F2EC/5D4E3E?text=Vintage+Warm'">
+            <div class="frame-option" onclick="OS.selectFrame('frame3.png')">
+                <img src="frame3.png" alt="Style 3" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+3'">
                 <div class="frame-label">Style 03</div>
             </div>
         </div>
-
-        <button class="btn-main" style="margin-top:25px; padding: 10px 35px; font-size: 1.8rem;" onclick="OS.startCam()">CONFIRM & START</button>
     </div>
 
-    <!-- 2. CAMERA SCREEN -->
     <div id="screen-cam" class="screen">
         <div class="ui-top">
-            <span style="color:var(--accent-warm); display:flex; align-items:center; gap:6px;">● <span style="font-size:0.8rem; letter-spacing:1px;">LIVE</span></span>
+            <span style="color:var(--accent-warm);">● REC</span>
             <span id="clock">00:00</span>
         </div>
 
         <div class="viewport">
             <video id="video-feed" autoplay playsinline muted></video>
-            <img id="live-frame-overlay" src="" alt="Frame Overlay">
             <div id="countdown">3</div>
             
-            <!-- Side Controls -->
             <div class="cam-sidebar">
-                <div class="tool-icon" onclick="OS.toggleCamFlip()" title="Flip Camera">↺</div>
-                <div class="tool-icon" onclick="OS.toggleTimer()" id="btn-timer" title="Timer">3s</div>
-                <div class="tool-icon" onclick="OS.toggleFlash()" id="btn-flash" title="Flash">⚡</div>
-                <div class="tool-icon" onclick="OS.toggleLiveOverlay()" id="btn-overlay" title="Toggle Frame Overlay">🖼️</div>
+                <div class="tool-icon" onclick="OS.toggleCamFlip()">↺</div>
+                <div class="tool-icon" onclick="OS.toggleTimer()" id="btn-timer" style="font-size:1rem; font-weight:bold;">3s</div>
+                <div class="tool-icon" onclick="OS.toggleFlash()">⚡</div>
             </div>
-
-            <!-- Shots Retake Tray -->
-            <div class="shots-preview-tray" id="shots-tray"></div>
         </div>
 
         <div class="ui-bottom">
             <div class="filter-select">
                 <div class="f-item active" onclick="OS.filter('normal', this)">Original</div>
-                <div class="f-item" onclick="OS.filter('soft', this)">Soft Focus</div>
-                <div class="f-item" onclick="OS.filter('bw', this)">B&W Classic</div>
-                <div class="f-item" onclick="OS.filter('warm', this)">Warm Kodak</div>
-                <div class="f-item" onclick="OS.filter('vintage', this)">Vintage Film</div>
+                <div class="f-item" onclick="OS.filter('soft', this)">Soft</div>
+                <div class="f-item" onclick="OS.filter('bw', this)">Mono</div>
+                <div class="f-item" onclick="OS.filter('warm', this)">Warm</div>
             </div>
             <div class="shutter-outer" onclick="OS.snap()">
                 <div class="shutter-inner"></div>
@@ -314,80 +289,56 @@
         </div>
     </div>
 
-    <!-- 3. RESULT & DECORATOR SCREEN -->
     <div id="screen-result" class="screen">
         <div class="preview-area">
-            <div class="preview-container">
-                <img id="final-img" class="preview-img" alt="Result Photobooth">
-            </div>
+            <img id="final-img" class="preview-img" alt="Result">
         </div>
 
         <div class="control-panel">
-            <div>
-                <div class="result-head">Tomoji Studio</div>
-                <div style="font-size:0.85rem; color:#888; margin-bottom:15px;">Add Stamps & Personalize</div>
+            <div class="result-head">Tomoji Studio</div>
+            <div style="font-size:0.9rem; color:#888; margin-bottom:20px;">Memories Saved.</div>
 
-                <!-- Sticker Stamps -->
-                <div style="font-size:0.8rem; font-weight:700; color:var(--ink-secondary);">ADD STAMPS</div>
-                <div class="decorator-tools">
-                    <button class="sticker-btn" onclick="OS.addSticker('❤️')">❤️</button>
-                    <button class="sticker-btn" onclick="OS.addSticker('✨')">✨</button>
-                    <button class="sticker-btn" onclick="OS.addSticker('🎀')">🎀</button>
-                    <button class="sticker-btn" onclick="OS.addSticker('🧸')">🧸</button>
-                    <button class="sticker-btn" onclick="OS.addSticker('🌸')">🌸</button>
-                    <button class="sticker-btn" onclick="OS.addSticker('📸')">📸</button>
-                </div>
-
-                <div id="qr-box">
-                    <div id="qrcode"></div>
-                    <span style="font-size:0.75rem; color:#888; margin-top:5px;">Scan to download digital copy</span>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; margin:10px 0;">
-                    <span id="log-text" style="font-size:0.8rem; color:var(--ink-secondary);">Processing high-res image...</span>
-                </div>
+            <div id="qr-box">
+                <div id="qrcode"></div>
             </div>
 
-            <div>
-                <button class="btn-action btn-primary" onclick="OS.printPhoto()">🖨️ Print Photo Strip</button>
-                <button class="btn-action" onclick="OS.shareNative()">📲 Share / Save Mobile</button>
-                <button class="btn-action" onclick="OS.download()">📥 Save Image (HD)</button>
-                <button class="btn-action" onclick="OS.downloadVideo()">🎥 Export Motion Clip</button>
-                <button class="btn-action" onclick="OS.restart()" style="border:none; color:#999; margin-top:5px; background:transparent;">Take New Photo</button>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span id="log-text" style="font-size:0.8rem; color:#aaa;">Processing...</span>
             </div>
+
+            <button class="btn-action btn-primary" onclick="OS.printPhoto()">🖨️ Print Photo</button>
+            <button class="btn-action" onclick="OS.download()">📥 Save Image</button>
+            <button class="btn-action" onclick="OS.downloadVideo()">🎥 Save Video</button>
+            <button class="btn-action" onclick="OS.restart()" style="border:none; color:#999; margin-top:10px;">Take New Photo</button>
         </div>
     </div>
 
     <div id="flash"></div>
-    <img id="print-only-img" src="" alt="Print Output">
+    <img id="print-only-img" src="" alt="Print">
     <canvas id="hidden-canvas" style="display:none;"></canvas>
 
     <script>
         const OS = (function() {
-            // Configuration & State
+            // --- CONFIGURATION ---
             const API_KEY = 'ffc90ad0bc5c7e0c056b68ef7430304a'; // ImgBB API Key
-            
-            let config = {
-                stripW: 1200, 
-                layout: 'strip-3', // 'strip-3', 'strip-4', 'grid-2x2'
-                shotsNeeded: 3,
-                gap: 30
+            const C = { 
+                stripW: 1200,    // ความกว้างรูปผลลัพธ์ (ยิ่งเยอะยิ่งชัดตอนปริ้น)
+                shots: 3,        // จำนวนช็อตที่ถ่าย
+                gap: 35,         // ช่องว่างระหว่างรูป
+                topMargin: 250,  // ระยะเว้นขอบบน (สำหรับหัวกระดาษ)
+                btmMargin: 150   // ระยะเว้นขอบล่าง
             };
             
             let s = { 
                 filter: 'normal', 
-                frameImg: null, 
-                frameUrl: 'frame1.png',
-                photos: [], // Array of Canvas Elements
+                frameImg: null,  // เก็บรูปกรอบที่เลือก
+                photos: [], 
                 stream: null, 
                 processing: false, 
                 timer: 3, 
                 flash: true, 
                 facingMode: 'user', 
-                mirror: true,
-                showLiveOverlay: true,
-                retakeIndex: -1,
-                stickers: []
+                mirror: true 
             };
 
             const D = {
@@ -403,37 +354,34 @@
                 flash: document.getElementById('flash'), 
                 final: document.getElementById('final-img'), 
                 btnTimer: document.getElementById('btn-timer'),
-                printImg: document.getElementById('print-only-img'),
-                liveOverlay: document.getElementById('live-frame-overlay'),
-                shotsTray: document.getElementById('shots-tray')
+                printImg: document.getElementById('print-only-img')
             };
 
-            // Audio Synthesis (Web Audio API)
+            // Audio Effect
             const Aud = {
                 ctx: null,
                 init: function() { if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
                 play: function(type) {
                     this.init(); if(this.ctx.state === 'suspended') this.ctx.resume();
-                    const g = this.ctx.createGain(); g.connect(this.ctx.destination);
+                    const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+                    o.connect(g); g.connect(this.ctx.destination);
                     const t = this.ctx.currentTime;
                     if(type === 'shutter') {
+                        // เสียงชัตเตอร์กล้อง
                         const n = this.ctx.createBufferSource(); 
-                        const b = this.ctx.createBuffer(1, this.ctx.sampleRate*0.08, this.ctx.sampleRate);
+                        const b = this.ctx.createBuffer(1, this.ctx.sampleRate*0.1, this.ctx.sampleRate);
                         const d = b.getChannelData(0); 
                         for(let i=0;i<b.length;i++) d[i]=Math.random()*2-1;
-                        n.buffer=b; n.connect(g); g.gain.value=0.4; n.start(t);
+                        n.buffer=b; n.connect(g); g.gain.value=0.3; n.start(t);
                     } else {
-                        const o = this.ctx.createOscillator(); o.connect(g);
-                        o.frequency.value = 900; g.gain.value = 0.12; 
-                        o.start(t); o.stop(t+0.08);
+                        // เสียงติ๊ด (Countdown)
+                        o.frequency.value = 800; g.gain.value = 0.1; 
+                        o.start(t); o.stop(t+0.1);
                     }
                 }
             };
 
-            function triggerHaptic() {
-                if (navigator.vibrate) navigator.vibrate(80);
-            }
-
+            // --- NAVIGATION ---
             function switchScreen(name) { 
                 Object.values(D.screens).forEach(s => s.classList.remove('active')); 
                 D.screens[name].classList.add('active'); 
@@ -441,31 +389,19 @@
 
             function goToFrameSelect() { switchScreen('select'); }
 
-            function setLayout(type, btn) {
-                config.layout = type;
-                if(type === 'strip-3') config.shotsNeeded = 3;
-                if(type === 'strip-4') config.shotsNeeded = 4;
-                if(type === 'grid-2x2') config.shotsNeeded = 4;
-
-                document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-
-            function selectFrame(url, el) {
-                s.frameUrl = url;
-                document.querySelectorAll('.frame-option').forEach(f => f.classList.remove('selected'));
-                el.classList.add('selected');
-            }
-
-            // Camera Setup
-            async function startCam() {
-                // Preload Selected Frame
+            function selectFrame(url) {
                 const img = new Image();
                 img.crossOrigin = "Anonymous";
-                img.src = s.frameUrl;
-                img.onload = () => { s.frameImg = img; D.liveOverlay.src = s.frameUrl; };
-                img.onerror = () => { s.frameImg = null; D.liveOverlay.src = ""; };
+                img.src = url;
+                img.onload = () => { s.frameImg = img; startCam(); };
+                img.onerror = () => { 
+                    console.warn("Frame image not found ("+url+"). Proceeding without frame."); 
+                    s.frameImg = null; startCam(); 
+                };
+            }
 
+            // --- CAMERA LOGIC ---
+            async function startCam() {
                 try {
                     s.stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { facingMode: s.facingMode, width: {ideal: 1920}, height: {ideal: 1080} }, 
@@ -473,10 +409,9 @@
                     });
                     D.video.srcObject = s.stream; 
                     updateMirror();
-                    renderShotsTray();
                     switchScreen('cam');
                     startClock();
-                } catch(e) { alert("Camera Permission Required!"); }
+                } catch(e) { alert("Camera Error: Please allow camera access."); }
             }
 
             function startClock() {
@@ -487,72 +422,31 @@
                 }, 1000);
             }
 
-            function toggleCamFlip() { s.facingMode = (s.facingMode === 'user') ? 'environment' : 'user'; if(s.stream) s.stream.getTracks().forEach(t=>t.stop()); startCam(); }
-            function toggleTimer() { const t = [3, 5, 10]; s.timer = t[(t.indexOf(s.timer)+1) % t.length]; D.btnTimer.innerText = s.timer + "s"; }
-            function toggleFlash() { s.flash = !s.flash; document.getElementById('btn-flash').style.opacity = s.flash?1:0.4; }
-            function toggleLiveOverlay() { s.showLiveOverlay = !s.showLiveOverlay; D.liveOverlay.style.display = s.showLiveOverlay ? 'block' : 'none'; }
+            function toggleCamFlip() { s.facingMode = (s.facingMode === 'user') ? 'environment' : 'user'; s.stream.getTracks().forEach(t=>t.stop()); startCam(); }
+            function toggleTimer() { const timers = [3, 5, 10]; s.timer = timers[(timers.indexOf(s.timer)+1) % timers.length]; D.btnTimer.innerText = s.timer + "s"; }
+            function toggleFlash() { s.flash = !s.flash; document.querySelector('.tool-icon:last-child').style.opacity = s.flash?1:0.3; }
+            function toggleMirror() { s.mirror = !s.mirror; updateMirror(); }
             function updateMirror() { D.video.style.transform = s.mirror ? "scaleX(-1)" : "scaleX(1)"; }
 
             function filter(mode, btn) {
                 s.filter = mode; 
                 document.querySelectorAll('.f-item').forEach(b => b.classList.remove('active')); 
                 btn.classList.add('active');
-                
                 let css = 'none';
-                if(mode==='soft') css = 'contrast(0.92) brightness(1.08) saturate(0.85) blur(0.3px)';
-                if(mode==='bw') css = 'grayscale(100%) contrast(1.2) brightness(0.95)';
-                if(mode==='warm') css = 'sepia(0.25) contrast(1.05) saturate(1.1) hue-rotate(-10deg)';
-                if(mode==='vintage') css = 'contrast(1.1) sepia(0.4) saturate(0.8)';
+                if(mode==='soft') css = 'contrast(0.9) brightness(1.1) saturate(0.9)';
+                if(mode==='bw') css = 'grayscale(100%) contrast(1.1)';
+                if(mode==='warm') css = 'sepia(0.3) contrast(1.05) saturate(0.9)';
                 D.video.style.filter = css;
             }
 
-            function renderShotsTray() {
-                D.shotsTray.innerHTML = '';
-                for(let i = 0; i < config.shotsNeeded; i++) {
-                    const thumb = document.createElement('div');
-                    thumb.className = `shot-thumb ${i === s.retakeIndex ? 'active' : ''}`;
-                    if(s.photos[i]) {
-                        const img = document.createElement('img');
-                        img.src = s.photos[i].toDataURL();
-                        img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
-                        thumb.appendChild(img);
-                        thumb.onclick = () => setRetakeShot(i);
-                    } else {
-                        thumb.innerHTML = `<span style="color:#fff; font-size:0.7rem; display:flex; height:100%; align-items:center; justify-content:center;">#${i+1}</span>`;
-                    }
-                    D.shotsTray.appendChild(thumb);
-                }
-            }
-
-            function setRetakeShot(index) {
-                s.retakeIndex = index;
-                renderShotsTray();
-            }
-
-            // Shooting Sequence
+            // --- SHOOTING PROCESS ---
             async function snap() {
-                if(s.processing) return; 
-                s.processing = true;
-
-                if(s.retakeIndex >= 0) {
-                    // Single Shot Retake
-                    await countdown(s.timer);
-                    const cvs = await capture();
-                    s.photos[s.retakeIndex] = cvs;
-                    s.retakeIndex = -1;
-                } else {
-                    // Full Sequence
-                    s.photos = [];
-                    for(let i=0; i < config.shotsNeeded; i++) { 
-                        renderShotsTray();
-                        await countdown(s.timer); 
-                        const cvs = await capture();
-                        s.photos.push(cvs);
-                    }
+                if(s.processing) return; s.processing = true; s.photos = [];
+                for(let i=0; i<C.shots; i++) { 
+                    await countdown(s.timer); 
+                    await capture(); 
+                    await new Promise(r => setTimeout(r, 800)); // Delay between shots
                 }
-                
-                renderShotsTray();
-                s.processing = false;
                 processResult();
             }
 
@@ -571,113 +465,106 @@
             function capture() {
                 return new Promise(r => {
                     Aud.play('shutter');
-                    triggerHaptic();
                     if(s.flash) { D.flash.style.opacity=1; setTimeout(() => D.flash.style.opacity=0, 150); }
                     
                     const cvs = document.createElement('canvas'); 
-                    cvs.width = D.video.videoWidth || 1280; 
-                    cvs.height = D.video.videoHeight || 720;
+                    cvs.width = D.video.videoWidth; cvs.height = D.video.videoHeight;
                     const ctx = cvs.getContext('2d');
                     
                     if(s.mirror) { ctx.translate(cvs.width, 0); ctx.scale(-1, 1); }
                     ctx.drawImage(D.video, 0, 0);
                     
-                    // Filter Application
+                    // Apply Filter to Canvas
                     if(s.filter !== 'normal') {
                         const id = ctx.getImageData(0,0,cvs.width,cvs.height); const d = id.data;
                         for(let i=0; i<d.length; i+=4) {
                             let R=d[i], G=d[i+1], B=d[i+2];
                             if(s.filter === 'bw') { const v = 0.299*R + 0.587*G + 0.114*B; d[i]=d[i+1]=d[i+2]=v; }
-                            else if(s.filter === 'warm') { d[i]=R*1.1; d[i+1]=G*0.98; d[i+2]=B*0.85; }
-                            else if(s.filter === 'vintage') { d[i]=R*0.9+40; d[i+1]=G*0.8+20; d[i+2]=B*0.7; }
+                            else if(s.filter === 'warm') { 
+                                d[i] = R*0.393+G*0.769+B*0.189; 
+                                d[i+1] = R*0.349+G*0.686+B*0.168; 
+                                d[i+2] = R*0.272+G*0.534+B*0.131; 
+                            }
+                            // Soft filter is mostly CSS based, simpler to skip pixel logic for speed or use simplified version
                         }
                         ctx.putImageData(id, 0, 0);
                     }
-                    setTimeout(() => r(cvs), 200);
+                    s.photos.push(cvs); 
+                    setTimeout(r, 200);
                 });
             }
 
-            // Canvas Output Generation
+            // --- RESULT GENERATION ---
             function processResult() {
-                generateCanvas();
+                generateStripCanvas();
                 const finalUrl = D.canvas.toDataURL('image/jpeg', 0.95);
                 D.final.src = finalUrl;
                 switchScreen('res');
-                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors:['#4A3E3D', '#8C7B68', '#E29578'] });
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors:['#5D4E3E', '#8C7B68', '#F9F7F2'] });
                 handleUpload(finalUrl);
             }
 
-            function generateCanvas(shiftOrder = 0) {
-                const W = config.stripW;
-                let H = 1800; // Base High-Res Canvas Height
+            function generateStripCanvas(shiftOrder = 0) {
+                // คำนวณขนาดภาพ
+                const stripW = C.stripW; 
+                const photoW = stripW * 0.85; // รูปกว้าง 85% ของกรอบ
+                const photoH = (photoW * 3) / 4; // สัดส่วน 4:3
+                
+                // คำนวณความสูงรวม (ถ้ามีรูปกรอบ ใช้รูปกรอบเป็นตัวตั้ง ถ้าไม่มีใช้ค่าคำนวณ)
+                let H;
+                if (s.frameImg) {
+                    // ปรับขนาด Canvas ให้เท่ากับ Ratio ของ Frame รูปที่ใส่มา
+                    const ratio = s.frameImg.height / s.frameImg.width;
+                    H = stripW * ratio;
+                } else {
+                    H = C.topMargin + (photoH * C.shots) + (C.gap * (C.shots-1)) + C.btmMargin;
+                }
 
-                if(config.layout === 'grid-2x2') H = 1200;
-
-                D.canvas.width = W; D.canvas.height = H;
+                D.canvas.width = stripW; D.canvas.height = H;
                 const ctx = D.canvas.getContext('2d');
                 
-                // Background
-                ctx.fillStyle = '#FDFBF7'; 
-                ctx.fillRect(0, 0, W, H);
+                // 1. Fill Background
+                ctx.fillStyle = '#F9F7F2'; 
+                ctx.fillRect(0,0,stripW,H);
 
+                // 2. Draw Photos
+                // Logic จัดเรียงรูป (สำหรับทำวิดีโอ shiftOrder จะเลื่อนรูป)
                 let displayPhotos = [...s.photos];
                 for(let i=0; i<shiftOrder; i++) displayPhotos.unshift(displayPhotos.pop());
 
-                // Render based on Layout Concept
-                if(config.layout === 'strip-3' || config.layout === 'strip-4') {
-                    const count = config.shotsNeeded;
-                    const photoW = W * 0.84;
-                    const photoH = (H * 0.72) / count;
-                    const startX = (W - photoW) / 2;
-                    let startY = 180;
+                // คำนวณตำแหน่งเริ่มวางรูป (กึ่งกลางแกน X)
+                const startX = (stripW - photoW) / 2;
+                
+                // ถ้ามีกรอบ เราต้องเดาว่าช่องว่างอยู่ตรงไหน 
+                // แต่เพื่อความง่าย เราจะวางรูปไว้ตำแหน่ง Center แล้วแปะกรอบทับ
+                // วิธี Tomoji: วางรูปลงไปก่อน แล้วเอากรอบทับ
+                
+                // คำนวณจุดเริ่ม Y (Manual Adjust: คุณอาจต้องแก้ตรงนี้ถ้ากรอบคุณมี Header ใหญ่มาก)
+                let currentY = (H - (photoH*C.shots + C.gap*(C.shots-1))) / 2; 
+                // หากกรอบ 1,2,3 ตำแหน่งช่องไม่เท่ากัน แนะนำให้ทำรูปกรอบให้มีช่องว่างเท่าๆ กัน
+                
+                displayPhotos.forEach(p => {
+                    // Center Crop logic
+                    const sR = p.width/p.height, dR = 4/3;
+                    let sx, sy, sw, sh;
+                    if(sR > dR) { sh=p.height; sw=sh*dR; sx=(p.width-sw)/2; sy=0; } 
+                    else { sw=p.width; sh=sw/dR; sx=0; sy=(p.height-sh)/2; }
+                    
+                    ctx.drawImage(p, sx, sy, sw, sh, startX, currentY, photoW, photoH);
+                    currentY += photoH + C.gap;
+                });
 
-                    displayPhotos.forEach(p => {
-                        if(!p) return;
-                        const sR = p.width/p.height, dR = photoW/photoH;
-                        let sx, sy, sw, sh;
-                        if(sR > dR) { sh=p.height; sw=sh*dR; sx=(p.width-sw)/2; sy=0; } 
-                        else { sw=p.width; sh=sw/dR; sx=0; sy=(p.height-sh)/2; }
-                        
-                        ctx.drawImage(p, sx, sy, sw, sh, startX, startY, photoW, photoH);
-                        startY += photoH + config.gap;
-                    });
-                } else if(config.layout === 'grid-2x2') {
-                    const photoW = (W * 0.42);
-                    const photoH = (H * 0.38);
-                    const positions = [
-                        {x: W*0.06, y: H*0.12}, {x: W*0.52, y: H*0.12},
-                        {x: W*0.06, y: H*0.54}, {x: W*0.52, y: H*0.54}
-                    ];
-
-                    displayPhotos.forEach((p, idx) => {
-                        if(!p || !positions[idx]) return;
-                        ctx.drawImage(p, 0, 0, p.width, p.height, positions[idx].x, positions[idx].y, photoW, photoH);
-                    });
-                }
-
-                // Overlay Concept Frame Image
+                // 3. Draw Frame Overlay
                 if(s.frameImg) {
-                    ctx.drawImage(s.frameImg, 0, 0, W, H);
+                    ctx.drawImage(s.frameImg, 0, 0, stripW, H);
+                } else {
+                    // Fallback Text ถ้าไม่เจอกรอบ
+                    ctx.fillStyle = "#5D4E3E"; ctx.font = "bold 80px 'Amatic SC'"; ctx.textAlign = "center";
+                    ctx.fillText("TOMOJI STUDIO", stripW/2, 150);
                 }
-
-                // Render Added Stamps
-                s.stickers.forEach(stk => {
-                    ctx.font = "60px sans-serif";
-                    ctx.fillText(stk.symbol, stk.x, stk.y);
-                });
             }
 
-            function addSticker(emoji) {
-                s.stickers.push({
-                    symbol: emoji,
-                    x: Math.random() * (config.stripW - 100) + 50,
-                    y: Math.random() * (1200) + 200
-                });
-                generateCanvas();
-                D.final.src = D.canvas.toDataURL('image/jpeg', 0.95);
-            }
-
-            // Export Actions
+            // --- EXPORT & PRINT ---
             async function handleUpload(base64) {
                 const log = document.getElementById('log-text');
                 try {
@@ -685,49 +572,36 @@
                     const res = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, { method: "POST", body: fd });
                     const data = await res.json();
                     if (data.success) {
-                        log.innerText = "Digital copy ready!";
+                        log.innerText = "QR Ready!";
                         document.getElementById('qrcode').innerHTML = "";
                         new QRCode(document.getElementById("qrcode"), { 
-                            text: data.data.url, width: 110, height: 110, 
-                            colorDark : "#4A3E3D", colorLight : "#FFF" 
+                            text: data.data.url, width: 100, height: 100, 
+                            colorDark : "#5D4E3E", colorLight : "#FFF" 
                         });
-                        document.getElementById('qr-box').style.display = 'flex';
+                        document.getElementById('qr-box').style.display = 'block';
                     }
-                } catch (err) { log.innerText = "Saved locally."; }
+                } catch (err) { log.innerText = "Upload Failed (Save manually)"; }
             }
 
             function download() { 
                 const a = document.createElement('a'); 
-                a.download = `TOMOJI_STUDIO_${Date.now()}.jpg`; 
+                a.download = `TOMOJI_${Date.now()}.jpg`; 
                 a.href = D.final.src; 
                 a.click(); 
             }
 
-            async function shareNative() {
-                if (navigator.share) {
-                    try {
-                        const blob = await (await fetch(D.final.src)).blob();
-                        const file = new File([blob], 'tomoji_photobooth.jpg', { type: 'image/jpeg' });
-                        await navigator.share({
-                            title: 'TOMOJI STUDIO Photobooth',
-                            text: 'Look at my photo strip from Tomoji Studio!',
-                            files: [file]
-                        });
-                    } catch (err) { console.log("Share canceled"); }
-                } else {
-                    download();
-                }
-            }
-
             function printPhoto() {
                 D.printImg.src = D.final.src;
-                setTimeout(() => { window.print(); }, 400);
+                // รอให้ภาพโหลดเข้า img tag เสร็จก่อนสั่งปริ้น
+                setTimeout(() => { window.print(); }, 500);
             }
 
             async function downloadVideo() {
+                if(s.processing) return;
                 const log = document.getElementById('log-text');
-                log.innerText = "Generating motion clip...";
+                log.innerText = "Generating Video...";
                 try {
+                    // Capture Canvas Stream
                     const stream = D.canvas.captureStream(30);
                     const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
                     const chunks = [];
@@ -736,33 +610,35 @@
                         const blob = new Blob(chunks, { type: 'video/webm' }); 
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a'); a.href = url; 
-                        a.download = `TOMOJI_MOTION_${Date.now()}.webm`;
+                        a.download = `TOMOJI_MOMENT_${Date.now()}.webm`;
                         a.click();
-                        generateCanvas(0); 
+                        // Restore original view
+                        generateStripCanvas(0); 
                         D.final.src = D.canvas.toDataURL('image/jpeg', 0.95);
-                        log.innerText = "Motion clip saved!";
+                        log.innerText = "Video Saved!";
                     };
                     
                     recorder.start();
+                    
+                    // Animation Loop for Video
                     let startT = Date.now(); 
                     let shift = 0;
                     const anim = setInterval(() => { 
-                        if (Date.now() - startT >= 3500) { 
+                        if (Date.now() - startT >= 4000) { // อัด 4 วินาที
                             clearInterval(anim); recorder.stop(); 
                         } else {
-                            if(Date.now() % 400 < 50) { shift++; generateCanvas(shift); }
+                            // สลับรูปทุก 0.5 วินาที
+                            if(Date.now() % 500 < 50) { 
+                                shift++; generateStripCanvas(shift); 
+                            }
                         }
                     }, 33); 
-                } catch(e) { alert("Video export not supported on this browser."); log.innerText=""; }
+                } catch(e) { alert("Video save not supported on this device/browser."); log.innerText=""; }
             }
 
             function restart() { location.reload(); }
 
-            return { 
-                goToFrameSelect, setLayout, selectFrame, startCam, toggleCamFlip, 
-                toggleTimer, toggleFlash, toggleLiveOverlay, filter, snap, 
-                addSticker, download, shareNative, printPhoto, downloadVideo, restart 
-            };
+            return { goToFrameSelect, selectFrame, toggleCamFlip, toggleTimer, toggleFlash, toggleMirror, filter, snap, download, restart, downloadVideo, printPhoto };
         })();
     </script>
 </body>
