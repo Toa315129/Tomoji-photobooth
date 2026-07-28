@@ -256,9 +256,9 @@
                 <img src="frame3.png" alt="Style 3" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+3'">
                 <div class="frame-label">Style 03</div>
             </div>
-            <!-- กรอบใหม่ที่เพิ่มเข้ามา บังคับถ่าย 1 รูป (พารามิเตอร์ที่ 2) และฟิลเตอร์ขาวดำ (พารามิเตอร์ที่ 3) -->
+            <!-- กรอบที่ 4: ถ่าย 1 รูป และใช้ฟิลเตอร์ขาวดำ -->
             <div class="frame-option" onclick="OS.selectFrame('frame4.png', 1, 'bw')">
-                <img src="frame4.png" alt="Style 4" onerror="this.src='https://placehold.co/1080x880/eee/999?text=Frame+4+(A4)'">
+                <img src="frame4.png" alt="Style 4" onerror="this.src='https://placehold.co/400x565/eee/999?text=Frame+4+(A4)'">
                 <div class="frame-label">Style 04</div>
             </div>
         </div>
@@ -328,7 +328,7 @@
             const API_KEY = 'ffc90ad0bc5c7e0c056b68ef7430304a'; // ImgBB API Key
             const C = { 
                 stripW: 1200,    
-                shots: 3,        // จำนวนช็อตตั้งต้น จะถูกแก้ไขผ่าน selectFrame ได้
+                shots: 3,        
                 gap: 35,         
                 topMargin: 250,  
                 btmMargin: 150   
@@ -390,7 +390,6 @@
 
             function goToFrameSelect() { switchScreen('select'); }
 
-            // อัปเดตฟังก์ชันนี้เพื่อรับพารามิเตอร์ในการกำหนดจำนวนรูปและฟิลเตอร์
             function selectFrame(url, customShots = 3, forceFilter = null) {
                 C.shots = customShots;
 
@@ -401,13 +400,12 @@
                     s.frameImg = img; 
                     startCam(); 
 
-                    // ตั้งค่าฟิลเตอร์อัตโนมัติเมื่อเลือกกรอบ
                     setTimeout(() => {
                         const btns = document.querySelectorAll('.f-item');
                         if (forceFilter === 'bw') {
-                            filter('bw', btns[2]); // Index 2 คือ Mono
+                            filter('bw', btns[2]);
                         } else {
-                            filter('normal', btns[0]); // คืนค่า Original สำหรับกรอบอื่น
+                            filter('normal', btns[0]);
                         }
                     }, 500);
                 };
@@ -518,14 +516,14 @@
 
             function generateStripCanvas(shiftOrder = 0) {
                 const stripW = C.stripW; 
-                const photoW = stripW * 0.85; 
-                const photoH = (photoW * 3) / 4; 
                 
                 let H;
                 if (s.frameImg) {
                     const ratio = s.frameImg.height / s.frameImg.width;
                     H = stripW * ratio;
                 } else {
+                    const photoW = stripW * 0.85; 
+                    const photoH = (photoW * 3) / 4; 
                     H = C.topMargin + (photoH * C.shots) + (C.gap * (C.shots-1)) + C.btmMargin;
                 }
 
@@ -538,20 +536,47 @@
                 let displayPhotos = [...s.photos];
                 for(let i=0; i<shiftOrder; i++) displayPhotos.unshift(displayPhotos.pop());
 
-                const startX = (stripW - photoW) / 2;
-                
-                let currentY = (H - (photoH*C.shots + C.gap*(C.shots-1))) / 2; 
-                
-                displayPhotos.forEach(p => {
-                    const sR = p.width/p.height, dR = 4/3;
-                    let sx, sy, sw, sh;
-                    if(sR > dR) { sh=p.height; sw=sh*dR; sx=(p.width-sw)/2; sy=0; } 
-                    else { sw=p.width; sh=sw/dR; sx=0; sy=(p.height-sh)/2; }
-                    
-                    ctx.drawImage(p, sx, sy, sw, sh, startX, currentY, photoW, photoH);
-                    currentY += photoH + C.gap;
-                });
+                if (C.shots === 1) {
+                    // --- ถ่าย 1 รูป (กรอบ 4 A4) ---
+                    // ขยายรูปถ่ายให้เต็มพื้นที่ Canvas (0, 0, stripW, H) แบบ Cover Fit
+                    // รูปถ่ายจะอยู่ด้านหลังและโผล่ออกมาตรงช่องเจาะโปร่งใสของ frame4.png โดยไม่มีขอบขาวซ้ำซ้อน
+                    if (displayPhotos.length > 0) {
+                        const p = displayPhotos[0];
+                        const sR = p.width / p.height;
+                        const dR = stripW / H;
+                        let sx, sy, sw, sh;
+                        if (sR > dR) {
+                            sh = p.height;
+                            sw = sh * dR;
+                            sx = (p.width - sw) / 2;
+                            sy = 0;
+                        } else {
+                            sw = p.width;
+                            sh = sw / dR;
+                            sx = 0;
+                            sy = (p.height - sh) / 2;
+                        }
+                        ctx.drawImage(p, sx, sy, sw, sh, 0, 0, stripW, H);
+                    }
+                } else {
+                    // --- กรณีถ่ายหลายรูป (กรอบ Style 1, 2, 3) ---
+                    const photoW = stripW * 0.85; 
+                    const photoH = (photoW * 3) / 4; 
+                    const startX = (stripW - photoW) / 2;
+                    let currentY = (H - (photoH * C.shots + C.gap * (C.shots - 1))) / 2; 
 
+                    displayPhotos.forEach(p => {
+                        const sR = p.width / p.height, dR = 4 / 3;
+                        let sx, sy, sw, sh;
+                        if(sR > dR) { sh = p.height; sw = sh * dR; sx = (p.width - sw) / 2; sy = 0; } 
+                        else { sw = p.width; sh = sw / dR; sx = 0; sy = (p.height - sh) / 2; }
+                        
+                        ctx.drawImage(p, sx, sy, sw, sh, startX, currentY, photoW, photoH);
+                        currentY += photoH + C.gap;
+                    });
+                }
+
+                // แปะรูปกรอบ overlay ไว้ชั้นบนสุด
                 if(s.frameImg) {
                     ctx.drawImage(s.frameImg, 0, 0, stripW, H);
                 } else {
