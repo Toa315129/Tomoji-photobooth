@@ -117,8 +117,37 @@
         .viewport { 
             flex: 1; position: relative; overflow: hidden; 
             display: flex; justify-content: center; align-items: center; width: 100%;
+            padding: 10px;
         }
-        video#video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        .cam-box {
+            position: relative;
+            height: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 2 / 3;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        video#video-feed { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transform: scaleX(-1); 
+        }
+
+        #cam-frame-overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            pointer-events: none;
+            z-index: 15;
+        }
 
         /* Tools Sidebar */
         .cam-sidebar {
@@ -271,7 +300,11 @@
         </div>
 
         <div class="viewport">
-            <video id="video-feed" autoplay playsinline muted></video>
+            <div class="cam-box">
+                <video id="video-feed" autoplay playsinline muted></video>
+                <img id="cam-frame-overlay" alt="Live Overlay" style="display:none;">
+            </div>
+
             <div id="countdown">3</div>
             
             <div class="cam-sidebar">
@@ -359,7 +392,9 @@
                 flash: document.getElementById('flash'), 
                 final: document.getElementById('final-img'), 
                 btnTimer: document.getElementById('btn-timer'),
-                printImg: document.getElementById('print-only-img')
+                printImg: document.getElementById('print-only-img'),
+                camOverlay: document.getElementById('cam-frame-overlay'),
+                camBox: document.querySelector('.cam-box')
             };
 
             const Aud = {
@@ -398,6 +433,14 @@
                 img.src = url;
                 img.onload = () => { 
                     s.frameImg = img; 
+                    
+                    // แสดงกรอบรูปตัวอย่างบนหน้าจอกล้องเรียลไทม์
+                    if (D.camOverlay && D.camBox) {
+                        D.camOverlay.src = url;
+                        D.camOverlay.style.display = 'block';
+                        D.camBox.style.aspectRatio = `${img.width} / ${img.height}`;
+                    }
+
                     startCam(); 
 
                     setTimeout(() => {
@@ -411,7 +454,9 @@
                 };
                 img.onerror = () => { 
                     console.warn("Frame image not found ("+url+"). Proceeding without frame."); 
-                    s.frameImg = null; startCam(); 
+                    s.frameImg = null; 
+                    if (D.camOverlay) D.camOverlay.style.display = 'none';
+                    startCam(); 
                 };
             }
 
@@ -480,12 +525,44 @@
                     Aud.play('shutter');
                     if(s.flash) { D.flash.style.opacity=1; setTimeout(() => D.flash.style.opacity=0, 150); }
                     
+                    const stripW = C.stripW;
+                    let H;
+                    if (s.frameImg) {
+                        H = stripW * (s.frameImg.height / s.frameImg.width);
+                    } else {
+                        const photoW = stripW * 0.85; 
+                        const photoH = (photoW * 3) / 4; 
+                        H = C.topMargin + (photoH * C.shots) + (C.gap * (C.shots-1)) + C.btmMargin;
+                    }
+
+                    // คำนวณอัตราส่วนภาพตัดครอบ (Crop Ratio) ให้ตรงกับพรีวิวบนหน้าจอ 100%
+                    let targetRatio = (C.shots === 1) ? (stripW / H) : (4 / 3);
+
+                    const vw = D.video.videoWidth || 1920;
+                    const vh = D.video.videoHeight || 1080;
+                    const videoRatio = vw / vh;
+
+                    let sx, sy, sw, sh;
+                    if (videoRatio > targetRatio) {
+                        sh = vh;
+                        sw = sh * targetRatio;
+                        sx = (vw - sw) / 2;
+                        sy = 0;
+                    } else {
+                        sw = vw;
+                        sh = sw / targetRatio;
+                        sx = 0;
+                        sy = (vh - sh) / 2;
+                    }
+
                     const cvs = document.createElement('canvas'); 
-                    cvs.width = D.video.videoWidth; cvs.height = D.video.videoHeight;
+                    cvs.width = sw; 
+                    cvs.height = sh;
                     const ctx = cvs.getContext('2d');
                     
                     if(s.mirror) { ctx.translate(cvs.width, 0); ctx.scale(-1, 1); }
-                    ctx.drawImage(D.video, 0, 0);
+                    
+                    ctx.drawImage(D.video, sx, sy, sw, sh, 0, 0, sw, sh);
                     
                     if(s.filter !== 'normal') {
                         const id = ctx.getImageData(0,0,cvs.width,cvs.height); const d = id.data;
@@ -538,25 +615,10 @@
 
                 if (C.shots === 1) {
                     // --- ถ่าย 1 รูป (กรอบ 4) ---
-                    // ปรับเป็น Contain Fit เพื่อแสดงรูปเต็มใบ ไม่โดนซูมตัดใบหน้า
+                    // วาดรูปถ่ายให้เต็มพื้นที่ Canvas พอดีกับช่องว่าง ไร้แถบว่างส่วนเกิน
                     if (displayPhotos.length > 0) {
                         const p = displayPhotos[0];
-                        const sR = p.width / p.height;
-                        const dR = stripW / H;
-                        let dx, dy, dw, dh;
-                        
-                        if (sR > dR) {
-                            dw = stripW;
-                            dh = stripW / sR;
-                            dx = 0;
-                            dy = (H - dh) / 2;
-                        } else {
-                            dh = H;
-                            dw = H * sR;
-                            dx = (stripW - dw) / 2;
-                            dy = 0;
-                        }
-                        ctx.drawImage(p, 0, 0, p.width, p.height, dx, dy, dw, dh);
+                        ctx.drawImage(p, 0, 0, p.width, p.height, 0, 0, stripW, H);
                     }
                 } else {
                     // --- กรณีถ่ายหลายรูป (กรอบ Style 1, 2, 3) ---
@@ -566,17 +628,12 @@
                     let currentY = (H - (photoH * C.shots + C.gap * (C.shots - 1))) / 2; 
 
                     displayPhotos.forEach(p => {
-                        const sR = p.width / p.height, dR = 4 / 3;
-                        let sx, sy, sw, sh;
-                        if(sR > dR) { sh = p.height; sw = sh * dR; sx = (p.width - sw) / 2; sy = 0; } 
-                        else { sw = p.width; sh = sw / dR; sx = 0; sy = (p.height - sh) / 2; }
-                        
-                        ctx.drawImage(p, sx, sy, sw, sh, startX, currentY, photoW, photoH);
+                        ctx.drawImage(p, 0, 0, p.width, p.height, startX, currentY, photoW, photoH);
                         currentY += photoH + C.gap;
                     });
                 }
 
-                // แปะรูปกรอบ overlay ไว้ชั้นบนสุด (ไม่วาดตัวอักษรใดๆ เพิ่มเติมบน Canvas)
+                // แปะรูปกรอบ overlay ไว้ชั้นบนสุด
                 if(s.frameImg) {
                     ctx.drawImage(s.frameImg, 0, 0, stripW, H);
                 }
