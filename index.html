@@ -4,33 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>TOMOJI STUDIO | PHOTOBOOTH | FREE FREE FREE </title>
+    <title>TOMOJI STUDIO | Premium Photobooth</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Quicksand:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Palette: TOMOJI Style (Cream, Brown, Soft Blue) */
-            --bg-paper: #F9F7F2;      
-            --ink-primary: #5D4E3E;   
-            --ink-secondary: #8C7B68; 
-            --accent-blue: #7A9CC6;   
-            --accent-warm: #D4AF37;
+            /* Premium Palette */
+            --bg-paper: #F5F3ED;      
+            --ink-primary: #2C241D;   
+            --ink-secondary: #7A6D61; 
+            --accent-blue: #6A8EAE;   
+            --accent-warm: #C69C6D;
+            --surface-glass: rgba(255, 255, 255, 0.6);
+            --surface-glass-hover: rgba(255, 255, 255, 0.9);
             
             --font-head: 'Amatic SC', cursive;
             --font-body: 'Quicksand', sans-serif;
+            
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            
+            --shadow-soft: 0 8px 32px rgba(44, 36, 29, 0.08);
+            --shadow-hover: 0 12px 48px rgba(44, 36, 29, 0.15);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
 
         body {
-            margin: 0; padding: 0;
-            background: var(--bg-paper);
+            background-color: var(--bg-paper);
             color: var(--ink-primary);
             height: 100vh; height: 100dvh; width: 100vw;
             overflow: hidden;
@@ -38,13 +46,14 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* Background Texture */
+        /* Ambient Background Overlay */
         .paper-bg {
             position: absolute; inset: 0; z-index: -1;
-            background-image: url('bg_paper.png'); 
-            background-color: var(--bg-paper);
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(198, 156, 109, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(106, 142, 174, 0.08), transparent 25%);
             background-size: cover;
-            opacity: 0.8;
+            opacity: 1;
         }
 
         /* Screen States */
@@ -52,7 +61,7 @@
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             opacity: 0; pointer-events: none;
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
         }
         .screen.active { opacity: 1; pointer-events: auto; }
@@ -61,130 +70,164 @@
         #screen-home {
             justify-content: center; align-items: center; text-align: center;
         }
+        
         .main-logo {
-            width: 250px; max-width: 80%; height: auto;
-            margin-bottom: 30px;
-            animation: float 3s ease-in-out infinite;
+            width: 280px; max-width: 75%; height: auto;
+            margin-bottom: 40px;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.05));
         }
-        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        
+        .logo-text {
+            font-family: var(--font-head); font-size: 5rem; color: var(--ink-primary);
+            margin-bottom: 20px; letter-spacing: 2px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
 
         .btn-start {
             background: var(--ink-primary); color: #fff; border: none;
-            padding: 15px 60px; font-family: var(--font-head); font-size: 2.5rem;
-            border-radius: 50px; cursor: pointer; 
-            box-shadow: 0 6px 0 var(--ink-secondary);
-            transition: transform 0.1s, box-shadow 0.1s;
+            padding: 16px 70px; font-family: var(--font-head); font-size: 2.8rem;
+            border-radius: 60px; cursor: pointer; letter-spacing: 4px;
+            box-shadow: 0 10px 25px rgba(44, 36, 29, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 10px;
         }
-        .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink-secondary); }
+        .btn-start:hover {
+            transform: translateY(-4px); box-shadow: 0 15px 35px rgba(44, 36, 29, 0.3);
+            background: #1a1511;
+        }
+        .btn-start:active { transform: translateY(2px); box-shadow: 0 5px 15px rgba(44, 36, 29, 0.2); }
         
-        .tagline { margin-top: 20px; color: var(--ink-secondary); font-size: 1rem; letter-spacing: 2px; }
+        .tagline { margin-top: 30px; color: var(--ink-secondary); font-size: 1.1rem; letter-spacing: 3px; font-weight: 500; text-transform: uppercase; }
 
         /* --- 1.5 FRAME SELECTION --- */
         #screen-select-frame {
-            justify-content: center; align-items: center; background: rgba(249, 247, 242, 0.95);
+            justify-content: center; align-items: center; background: rgba(245, 243, 237, 0.98);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
-        .page-title { font-family: var(--font-head); font-size: 3.5rem; color: var(--ink-primary); margin-bottom: 10px; }
+        .page-title { font-family: var(--font-head); font-size: 4rem; color: var(--ink-primary); margin-bottom: 5px; }
+        .page-subtitle { color: var(--ink-secondary); font-size: 1.1rem; margin-bottom: 40px; letter-spacing: 1px; font-weight: 500; }
+        
         .frame-grid {
-            display: flex; gap: 20px; justify-content: center; align-items: center;
-            flex-wrap: wrap; width: 100%; max-width: 900px; padding: 10px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 25px; justify-content: center; align-items: center;
+            width: 100%; max-width: 900px; padding: 0 30px;
         }
+        
         .frame-option {
-            cursor: pointer; transition: 0.3s;
-            background: #fff; padding: 10px; border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(93, 78, 62, 0.1);
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--surface-glass); padding: 15px; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
             display: flex; flex-direction: column; align-items: center;
-            width: 30%; max-width: 150px;
+            border: 1px solid rgba(255,255,255,0.8);
         }
         .frame-option img {
             width: 100%; height: auto; aspect-ratio: 2/3;
-            object-fit: contain; border-radius: 8px; border: 1px dashed var(--ink-secondary);
-            background: #fafafa;
+            object-fit: contain; border-radius: var(--radius-sm); 
+            background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
         }
-        .frame-option:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(122, 156, 198, 0.3); }
-        .frame-label { margin-top: 10px; font-family: var(--font-head); font-size: 1.5rem; }
+        .frame-option:hover { 
+            transform: translateY(-12px); box-shadow: var(--shadow-hover); 
+            background: var(--surface-glass-hover);
+        }
+        .frame-option:hover img { transform: scale(1.02); }
+        .frame-label { margin-top: 15px; font-family: var(--font-body); font-weight: 700; font-size: 1.1rem; color: var(--ink-primary); letter-spacing: 1px;}
 
         /* --- 2. CAMERA SCREEN --- */
-        #screen-cam { background: #222; justify-content: space-between; }
+        #screen-cam { background: #000; justify-content: space-between; }
         
         .ui-top {
-            position: absolute; top: 0; width: 100%; padding: 20px;
+            position: absolute; top: 0; width: 100%; padding: 30px 40px;
             display: flex; justify-content: space-between; align-items: center; z-index: 20;
-            color: #fff; font-family: var(--font-body); font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            color: #fff; font-family: var(--font-body); font-weight: 700; font-size: 1.1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
         }
+        
+        .rec-indicator { display: flex; align-items: center; gap: 8px; color: #fff; }
+        .rec-dot { width: 10px; height: 10px; background: #FF4B4B; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 75, 75, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 75, 75, 0); } }
 
         .viewport { 
             flex: 1; position: relative; overflow: hidden; 
             display: flex; justify-content: center; align-items: center; width: 100%;
-            padding: 10px;
         }
 
         .cam-box {
-            position: relative;
-            height: 100%;
-            max-height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border-radius: 12px;
+            position: relative; height: 100%; max-height: 100%; width: 100%;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
 
         video#video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         #cam-frame-overlay {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* คงสัดส่วนกรอบไม่ให้บีบเบี้ยว */
-            pointer-events: none;
-            z-index: 15;
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: contain; pointer-events: none; z-index: 15;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
         }
 
-        /* Tools Sidebar */
+        /* Glassmorphism Sidebar */
         .cam-sidebar {
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            position: absolute; right: 30px; top: 50%; transform: translateY(-50%);
             display: flex; flex-direction: column; gap: 20px; z-index: 30;
+            background: rgba(0, 0, 0, 0.25); padding: 15px; border-radius: 40px;
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .tool-icon {
-            width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(5px);
-            transition: 0.2s; border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; font-size: 1.1rem; cursor: pointer;
+            transition: all 0.2s; background: rgba(255,255,255,0.1);
         }
-        .tool-icon:active { transform: scale(0.9); background: var(--accent-blue); }
+        .tool-icon svg { width: 22px; height: 22px; fill: currentColor; }
+        .tool-icon:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+        .tool-icon:active { transform: scale(0.95); background: #fff; color: #000; }
 
         #countdown {
-            position: absolute; font-family: var(--font-head); font-size: 12rem; color: #fff;
-            display: none; z-index: 100; text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: absolute; font-family: var(--font-body); font-size: 12rem; font-weight: 700; color: #fff;
+            display: none; z-index: 100; text-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .ui-bottom {
-            height: 160px; width: 100%; background: #fff;
-            border-radius: 30px 30px 0 0;
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 30px 20px 50px 20px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 20; position: relative;
+            z-index: 20;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
         }
         
-        /* Filter Selector */
+        /* Modern Filter Selector */
         .filter-select {
-            display: flex; gap: 15px; margin-bottom: 15px;
+            display: flex; gap: 25px; margin-bottom: 25px;
+            background: rgba(0,0,0,0.3); padding: 10px 25px; border-radius: 30px;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         .f-item {
-            font-size: 0.8rem; color: #999; cursor: pointer; font-weight: 600;
+            font-size: 0.9rem; color: rgba(255,255,255,0.6); cursor: pointer; font-weight: 600;
+            transition: all 0.3s; letter-spacing: 1px; text-transform: uppercase;
         }
-        .f-item.active { color: var(--ink-primary); border-bottom: 2px solid var(--ink-primary); }
+        .f-item:hover { color: rgba(255,255,255,0.9); }
+        .f-item.active { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); transform: scale(1.05); }
 
-        /* Shutter Button */
+        /* Professional Shutter Button */
         .shutter-outer {
-            width: 75px; height: 75px; border-radius: 50%;
-            border: 4px solid var(--ink-primary); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s;
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 4px solid #fff; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .shutter-inner { width: 60px; height: 60px; background: var(--ink-primary); border-radius: 50%; }
-        .shutter-outer:active { transform: scale(0.95); }
+        .shutter-inner { 
+            width: 62px; height: 62px; background: #fff; border-radius: 50%; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .shutter-outer:hover .shutter-inner { transform: scale(0.95); }
+        .shutter-outer:active .shutter-inner { transform: scale(0.8); background: #eee; }
+        .shutter-outer:active { transform: scale(0.95); border-color: #ddd; }
 
         /* --- 3. RESULT SCREEN --- */
         #screen-result {
@@ -194,37 +237,49 @@
         .preview-area {
             flex: 1; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: radial-gradient(#fff, var(--bg-paper));
-            padding: 20px;
+            padding: 40px; position: relative;
         }
         .preview-img {
-            max-height: 90%; width: auto; 
-            box-shadow: 0 10px 40px rgba(93, 78, 62, 0.2);
-            transform: rotate(-1deg); border: 8px solid #fff;
+            max-height: 90%; max-width: 90%; width: auto; 
+            box-shadow: 0 20px 50px rgba(44, 36, 29, 0.15);
+            transform: rotate(-1.5deg); border: 12px solid #fff;
+            border-bottom-width: 40px; border-radius: 4px;
+            transition: transform 0.4s ease;
         }
+        .preview-img:hover { transform: rotate(0deg) scale(1.02); }
 
         .control-panel {
-            width: 320px; background: #fff;
-            border-left: 1px dashed var(--ink-secondary);
-            display: flex; flex-direction: column; padding: 30px;
-            justify-content: center; 
+            width: 360px; background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; padding: 40px 30px;
+            justify-content: center; box-shadow: -10px 0 30px rgba(0,0,0,0.02);
+            z-index: 2;
         }
 
-        .result-head { font-family: var(--font-head); font-size: 2.5rem; color: var(--ink-primary); margin-bottom: 5px; }
+        .result-head { font-family: var(--font-head); font-size: 3rem; color: var(--ink-primary); margin-bottom: 5px; }
         
         /* Action Buttons */
         .btn-action {
-            background: #fff; border: 2px solid var(--ink-primary); color: var(--ink-primary);
-            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; 
-            font-family: var(--font-body); font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s;
+            background: #fff; border: 1px solid rgba(44, 36, 29, 0.1); color: var(--ink-primary);
+            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: var(--radius-sm); 
+            font-family: var(--font-body); font-weight: 700; font-size: 1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
-        .btn-action:hover { background: var(--bg-paper); }
-        .btn-primary { background: var(--ink-primary); color: #fff; }
-        .btn-primary:hover { opacity: 0.9; background: var(--ink-primary); }
+        .btn-action svg { width: 18px; height: 18px; fill: currentColor; }
+        .btn-action:hover { background: var(--bg-paper); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); }
+        .btn-action:active { transform: translateY(0); }
+        
+        .btn-primary { background: var(--ink-primary); color: #fff; border: none; }
+        .btn-primary:hover { background: #1a1511; color: #fff; }
 
-        #qr-box { margin: 10px auto; padding: 10px; background: #fff; border: 2px dashed var(--ink-secondary); display: none; }
+        #qr-box { 
+            margin: 20px auto 30px auto; padding: 20px; background: #fff; 
+            border-radius: var(--radius-md); box-shadow: var(--shadow-soft); 
+            display: none; flex-direction: column; align-items: center;
+        }
+        #qr-box span { font-size: 0.8rem; color: var(--ink-secondary); margin-top: 10px; font-weight: 600; }
         
         #flash { position: fixed; inset: 0; background: #fff; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
 
@@ -242,11 +297,17 @@
 
         /* Mobile Layout */
         @media (max-width: 900px) {
-            #screen-result { flex-direction: column; overflow-y: auto; }
-            .preview-area { height: 55%; padding: 20px; }
-            .control-panel { width: 100%; height: auto; border-left: none; border-top: 1px dashed var(--ink-secondary); padding: 20px; }
-            .preview-img { max-height: 100%; width: auto; transform: rotate(0); }
-            .frame-option { width: 45%; }
+            .logo-text { font-size: 4rem; }
+            #screen-result { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+            .preview-area { height: auto; min-height: 55vh; padding: 30px 20px; }
+            .control-panel { width: 100%; height: auto; border-left: none; border-top: 1px solid rgba(0,0,0,0.05); padding: 30px 20px; }
+            .preview-img { max-height: 500px; border-width: 8px; border-bottom-width: 30px; transform: rotate(0); }
+            .frame-grid { padding: 0 15px; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .ui-top { padding: 20px; }
+            .cam-sidebar { right: 15px; padding: 10px; }
+            .tool-icon { width: 40px; height: 40px; font-size: 0.9rem; }
+            .shutter-outer { width: 70px; height: 70px; }
+            .shutter-inner { width: 54px; height: 54px; }
         }
     </style>
 </head>
@@ -254,42 +315,44 @@
 
     <div class="paper-bg"></div>
 
+    <!-- 1. HOME -->
     <div id="screen-home" class="screen active">
-        <img src="logo.png" class="main-logo" alt="Tomoji Studio" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block'">
-        <div class="logo-text" style="display:none; font-family:var(--font-head); font-size:4rem; color:var(--ink-primary);">TOMOJI STUDIO</div>
-        
+        <div class="logo-text">TOMOJI STUDIO</div>
         <button class="btn-start" onclick="OS.goToFrameSelect()">START</button>
         <div class="tagline">Capture Your Natural Moment</div>
     </div>
 
+    <!-- 1.5 SELECT FRAME -->
     <div id="screen-select-frame" class="screen">
         <div class="page-title">Pick Your Frame</div>
-        <div style="color:var(--ink-secondary)">Choose your favorite style</div>
+        <div class="page-subtitle">Choose a style that matches your mood</div>
         
         <div class="frame-grid">
             <div class="frame-option" onclick="OS.selectFrame('frame1.png')">
-                <img src="frame1.png" alt="Style 1" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+1'">
-                <div class="frame-label">Style 01</div>
+                <img src="frame1.png" alt="Style 1" onerror="this.src='https://placehold.co/400x600/F5F3ED/7A6D61?text=Style+01'">
+                <div class="frame-label">Classic Strip</div>
             </div>
             <div class="frame-option" onclick="OS.selectFrame('frame2.png')">
-                <img src="frame2.png" alt="Style 2" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+2'">
-                <div class="frame-label">Style 02</div>
+                <img src="frame2.png" alt="Style 2" onerror="this.src='https://placehold.co/400x600/F5F3ED/7A6D61?text=Style+02'">
+                <div class="frame-label">Modern Clean</div>
             </div>
             <div class="frame-option" onclick="OS.selectFrame('frame3.png')">
-                <img src="frame3.png" alt="Style 3" onerror="this.src='https://placehold.co/400x600/eee/999?text=Frame+3'">
-                <div class="frame-label">Style 03</div>
+                <img src="frame3.png" alt="Style 3" onerror="this.src='https://placehold.co/400x600/F5F3ED/7A6D61?text=Style+03'">
+                <div class="frame-label">Vintage Vibe</div>
             </div>
-            <!-- กรอบที่ 4: ถ่าย 1 รูป และใช้ฟิลเตอร์ขาวดำ พร้อมพรีวิวกรอบในกล้อง -->
             <div class="frame-option" onclick="OS.selectFrame('frame4.png', 1, 'bw')">
-                <img src="frame4.png" alt="Style 4" onerror="this.src='https://placehold.co/400x565/eee/999?text=Frame+4+(A4)'">
-                <div class="frame-label">Style 04</div>
+                <img src="frame4.png" alt="Style 4" onerror="this.src='https://placehold.co/400x565/F5F3ED/7A6D61?text=Style+04'">
+                <div class="frame-label">Mono Portrait</div>
             </div>
         </div>
     </div>
 
+    <!-- 2. CAMERA -->
     <div id="screen-cam" class="screen">
         <div class="ui-top">
-            <span style="color:var(--accent-warm);">● REC</span>
+            <div class="rec-indicator">
+                <div class="rec-dot"></div> REC
+            </div>
             <span id="clock">00:00</span>
         </div>
 
@@ -302,9 +365,15 @@
             <div id="countdown">3</div>
             
             <div class="cam-sidebar">
-                <div class="tool-icon" onclick="OS.toggleCamFlip()">↺</div>
-                <div class="tool-icon" onclick="OS.toggleTimer()" id="btn-timer" style="font-size:1rem; font-weight:bold;">3s</div>
-                <div class="tool-icon" onclick="OS.toggleFlash()">⚡</div>
+                <div class="tool-icon" onclick="OS.toggleCamFlip()" title="Flip Camera">
+                    <svg viewBox="0 0 24 24"><path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm-3.2-5c0 1.77 1.43 3.2 3.2 3.2s3.2-1.43 3.2-3.2-1.43-3.2-3.2-3.2-3.2 1.43-3.2 3.2z"/></svg>
+                </div>
+                <div class="tool-icon" onclick="OS.toggleTimer()" style="font-weight:700; font-family:var(--font-body);">
+                    <span id="btn-timer">3s</span>
+                </div>
+                <div class="tool-icon" onclick="OS.toggleFlash()" title="Flash">
+                    <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                </div>
             </div>
         </div>
 
@@ -321,6 +390,7 @@
         </div>
     </div>
 
+    <!-- 3. RESULT -->
     <div id="screen-result" class="screen">
         <div class="preview-area">
             <img id="final-img" class="preview-img" alt="Result">
@@ -328,20 +398,34 @@
 
         <div class="control-panel">
             <div class="result-head">Tomoji Studio</div>
-            <div style="font-size:0.9rem; color:#888; margin-bottom:20px;">Memories Saved.</div>
+            <div style="font-size:0.95rem; color:var(--ink-secondary); margin-bottom:20px; font-weight:500;">Your memories are ready.</div>
 
             <div id="qr-box">
                 <div id="qrcode"></div>
+                <span>Scan to download</span>
             </div>
 
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span id="log-text" style="font-size:0.8rem; color:#aaa;">Processing...</span>
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <span id="log-text" style="font-size:0.85rem; color:var(--ink-secondary); font-weight:600;">Processing...</span>
             </div>
 
-            <button class="btn-action btn-primary" onclick="OS.printPhoto()">🖨️ Print Photo</button>
-            <button class="btn-action" onclick="OS.download()">📥 Save Image</button>
-            <button class="btn-action" onclick="OS.downloadVideo()">🎥 Save Video</button>
-            <button class="btn-action" onclick="OS.restart()" style="border:none; color:#999; margin-top:10px;">Take New Photo</button>
+            <button class="btn-action btn-primary" onclick="OS.printPhoto()">
+                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                Print Photo
+            </button>
+            <button class="btn-action" onclick="OS.download()">
+                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                Save Image
+            </button>
+            <button class="btn-action" onclick="OS.downloadVideo()">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                Save Video
+            </button>
+            
+            <button class="btn-action" onclick="OS.restart()" style="border:none; color:var(--ink-secondary); margin-top:15px; background:transparent; box-shadow:none;">
+                <svg viewBox="0 0 24 24" style="width:16px; height:16px;"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                Take New Photo
+            </button>
         </div>
     </div>
 
@@ -482,7 +566,7 @@
 
             function toggleCamFlip() { s.facingMode = (s.facingMode === 'user') ? 'environment' : 'user'; s.stream.getTracks().forEach(t=>t.stop()); startCam(); }
             function toggleTimer() { const timers = [3, 5, 10]; s.timer = timers[(timers.indexOf(s.timer)+1) % timers.length]; D.btnTimer.innerText = s.timer + "s"; }
-            function toggleFlash() { s.flash = !s.flash; document.querySelector('.tool-icon:last-child').style.opacity = s.flash?1:0.3; }
+            function toggleFlash() { s.flash = !s.flash; document.querySelector('.tool-icon:last-child').style.opacity = s.flash?1:0.4; }
             function toggleMirror() { s.mirror = !s.mirror; updateMirror(); }
             function updateMirror() { D.video.style.transform = s.mirror ? "scaleX(-1)" : "scaleX(1)"; }
 
@@ -511,9 +595,20 @@
                 return new Promise(r => {
                     let c = n; D.count.style.display = 'block'; D.count.innerText = c; 
                     Aud.play('beep');
+                    
+                    // Trigger reflow to restart CSS animation
+                    D.count.style.animation = 'none';
+                    D.count.offsetHeight; 
+                    D.count.style.animation = null;
+
                     const t = setInterval(() => { 
                         c--; 
-                        if(c>0) { D.count.innerText = c; Aud.play('beep'); } 
+                        if(c>0) { 
+                            D.count.innerText = c; Aud.play('beep'); 
+                            D.count.style.animation = 'none';
+                            D.count.offsetHeight; 
+                            D.count.style.animation = null;
+                        } 
                         else { clearInterval(t); D.count.style.display = 'none'; r(); } 
                     }, 1000);
                 });
@@ -554,7 +649,7 @@
                 const finalUrl = D.canvas.toDataURL('image/jpeg', 0.95);
                 D.final.src = finalUrl;
                 switchScreen('res');
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors:['#5D4E3E', '#8C7B68', '#F9F7F2'] });
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors:['#2C241D', '#7A6D61', '#C69C6D'] });
                 handleUpload(finalUrl);
             }
 
@@ -574,14 +669,14 @@
                 D.canvas.width = stripW; D.canvas.height = H;
                 const ctx = D.canvas.getContext('2d');
                 
-                ctx.fillStyle = '#F9F7F2'; 
+                ctx.fillStyle = '#F5F3ED'; 
                 ctx.fillRect(0,0,stripW,H);
 
                 let displayPhotos = [...s.photos];
                 for(let i=0; i<shiftOrder; i++) displayPhotos.unshift(displayPhotos.pop());
 
                 if (C.shots === 1) {
-                    // --- ถ่าย 1 รูป (กรอบ Style 04): Aspect Fill (Cover) เต็มผืนผ้าใบ ---
+                    // --- ถ่าย 1 รูป (กรอบ Style 04) ---
                     if (displayPhotos.length > 0) {
                         const p = displayPhotos[0];
                         const sR = p.width / p.height; 
@@ -589,17 +684,9 @@
                         
                         let sx, sy, sw, sh;
                         if (sR > dR) {
-                            // รูปกล้องกว้างกว่ากรอบ -> ตัดขอบซ้าย-ขวาออก ให้ความสูงเต็ม
-                            sh = p.height;
-                            sw = sh * dR;
-                            sx = (p.width - sw) / 2;
-                            sy = 0;
+                            sh = p.height; sw = sh * dR; sx = (p.width - sw) / 2; sy = 0;
                         } else {
-                            // รูปกล้องสูงกว่ากรอบ -> ตัดขอบบน-ล่างออก ให้ความกว้างเต็ม
-                            sw = p.width;
-                            sh = sw / dR;
-                            sx = 0;
-                            sy = (p.height - sh) / 2;
+                            sw = p.width; sh = sw / dR; sx = 0; sy = (p.height - sh) / 2;
                         }
                         ctx.drawImage(p, sx, sy, sw, sh, 0, 0, stripW, H);
                     }
@@ -636,10 +723,10 @@
                         log.innerText = "QR Ready!";
                         document.getElementById('qrcode').innerHTML = "";
                         new QRCode(document.getElementById("qrcode"), { 
-                            text: data.data.url, width: 100, height: 100, 
-                            colorDark : "#5D4E3E", colorLight : "#FFF" 
+                            text: data.data.url, width: 120, height: 120, 
+                            colorDark : "#2C241D", colorLight : "#FFF" 
                         });
-                        document.getElementById('qr-box').style.display = 'block';
+                        document.getElementById('qr-box').style.display = 'flex';
                     }
                 } catch (err) { log.innerText = "Upload Failed (Save manually)"; }
             }
